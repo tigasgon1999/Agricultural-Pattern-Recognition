@@ -75,7 +75,11 @@ def main():
                      node_size=train_args.node_size)
 
     net, start_epoch = train_args.resume_train(net)
-    net.cuda()
+    if torch.cuda.is_available():
+        print("Using GPU")
+        net.cuda()
+    else:
+        print("Using CPU")
     net.train()
 
     # prepare dataset for training and validation
@@ -113,7 +117,8 @@ def main():
         for i, (inputs, labels) in enumerate(train_loader):
             sys.stdout.flush()
 
-            inputs, labels = inputs.cuda(), labels.cuda(),
+            if torch.cuda.is_available():
+                inputs, labels = inputs.cuda(), labels.cuda(),
             N = inputs.size(0) * inputs.size(2) * inputs.size(3)
             optimizer.zero_grad()
             outputs, cost = net(inputs)
