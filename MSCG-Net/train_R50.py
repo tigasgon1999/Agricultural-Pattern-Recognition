@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import sys
 import time
+from tqdm import tqdm
 
 import torchvision.utils as vutils
 from lib.loss.acw_loss import *
@@ -19,6 +20,7 @@ from lib.utils.lr import init_params_lr
 from lib.utils.measure import *
 from lib.utils.visual import *
 from tools.model import load_model
+import pandas as pd
 
 cudnn.benchmark = True
 
@@ -47,7 +49,7 @@ train_args.max_iter = 1e8
 
 train_args.snapshot = ''
 
-train_args.print_freq = 100
+train_args.print_freq = 1
 train_args.save_pred = False
 # output training configuration to a text file
 train_args.ckpt_path=os.path.abspath(os.curdir)
@@ -76,10 +78,10 @@ def main():
 
     net, start_epoch = train_args.resume_train(net)
     if torch.cuda.is_available():
-        print("Using GPU")
+        print("#"*41 + "\n" + "\t"*2 + "Using GPU\n" + "#"*41)
         net.cuda()
     else:
-        print("Using CPU")
+        print("#"*41 + "\n" + "\t"*2 + "Using CPU\n" + "#"*41)
     net.train()
 
     # prepare dataset for training and validation
@@ -100,9 +102,24 @@ def main():
 
 
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, 60, 1.18e-6)
-
     new_ep = 0
+
+    print('-- Initializing data saver for all epochs...')
+    data_dictionary = {}
+    print('-- Initializing data lists for all iterations inside epoch')
+    epochs = []
+    iters = []
+    num_iters = []
+    losses = []
+    aux_lossess = []
+    cls_ = []
+    learning_rates = []
+    times = []
+    val_losses = []
+    
     while True:
+        run_times = []
+
         starttime = time.time()
         train_main_loss = AverageMeter()
         aux_train_loss = AverageMeter()
@@ -113,8 +130,8 @@ def main():
         num_iter = len(train_loader)
         curr_iter = ((start_epoch + new_ep) - 1) * num_iter
         print('---curr_iter: {}, num_iter per epoch: {}---'.format(curr_iter, num_iter))
-
-        for i, (inputs, labels) in enumerate(train_loader):
+        
+        for i, (inputs, labels) in tqdm(enumerate(train_loader)):
             sys.stdout.flush()
 
             if torch.cuda.is_available():
@@ -146,13 +163,39 @@ def main():
                       (start_epoch + new_ep, i + 1, num_iter, train_main_loss.avg, aux_train_loss.avg,
                        cls_trian_loss.avg,
                        optimizer.param_groups[0]['lr'], newtime - starttime))
-
+                run_time = newtime - starttime
                 starttime = newtime
 
-        validate(net, val_set, val_loader, criterion, optimizer, start_epoch + new_ep, new_ep)
+                run_times.append(run_time)
+                
+        # Store progress
+        epochs.append(start_epoch + new_ep)
+        #iters.append(i+1)
+        #num_iters.append(num_iter)
+        losses.append(train_main_loss.avg)
+        aux_lossess.append(aux_train_loss.avg)
+        cls_.append(cls_trian_loss.avg)
+        learning_rates.append(optimizer.param_groups[0]['lr'])
+        run_times = np.array(run_times)
+        times.append(np.mean(run_times))
+
+        val_loss, _, _, _ = validate(net, val_set, val_loader, criterion, optimizer, start_epoch + new_ep, new_ep)
+
+        val_losses.append(val_loss)
 
         new_ep += 1
 
+    data_dictionary['epochs'] = epochs
+    data_dictionary['iterations'] = iters
+    data_dictionary['loss'] = loss
+    data_dictionary['aux_loss'] = aux_loss
+    data_dictionary['cls'] = cls_
+    data_dictionary['learning_rates'] = learning_rates
+    data_dictionary['times'] = times
+    data_dictionary['val_loss'] = val_losses
+
+    dataframe = pd.DataFrame.from_dict(data_dictionnary)
+    dataframe.to_csv('training_progress.csv')
 
 def validate(net, val_set, val_loader, criterion, optimizer, epoch, new_ep):
     net.eval()
