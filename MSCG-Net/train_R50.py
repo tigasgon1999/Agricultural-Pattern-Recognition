@@ -78,10 +78,10 @@ def main():
 
     net, start_epoch = train_args.resume_train(net)
     if torch.cuda.is_available():
-        print("Using GPU")
+        print("#"*41 + "\n" + "\t"*2 + "Using GPU\n" + "#"*41)
         net.cuda()
     else:
-        print("Using CPU")
+        print("#"*41 + "\n" + "\t"*2 + "Using CPU\n" + "#"*41)
     net.train()
 
     # prepare dataset for training and validation
