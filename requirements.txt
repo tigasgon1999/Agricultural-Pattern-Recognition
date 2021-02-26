@@ -1,11 +1,11 @@
 albumentations==0.5.2
-argon2-cffi @ file:///tmp/build/80754af9/argon2-cffi_1596828493937/work
+argon2-cffi
 async-generator==1.10
-attrs @ file:///tmp/build/80754af9/attrs_1600298409949/work
+attrs
 backcall==0.2.0
-bleach @ file:///tmp/build/80754af9/bleach_1600439572647/work
+bleach
 certifi==2020.6.20
-cffi @ file:///tmp/build/80754af9/cffi_1600699146221/work
+cffi
 chardet==4.0.0
 cloudpickle==1.6.0
 cycler==0.10.0
@@ -16,38 +16,37 @@ gym==0.18.0
 idna==2.10
 imageio==2.9.0
 imgaug==0.4.0
-importlib-metadata @ file:///tmp/build/80754af9/importlib-metadata_1593446406207/work
-ipykernel @ file:///tmp/build/80754af9/ipykernel_1596207638929/work/dist/ipykernel-5.3.4-py3-none-any.whl
-ipython @ file:///tmp/build/80754af9/ipython_1598883821407/work
+importlib-metadata
+ipykernel
+ipython
 ipython-genutils==0.2.0
-ipywidgets @ file:///tmp/build/80754af9/ipywidgets_1601490159889/work
-jedi @ file:///tmp/build/80754af9/jedi_1598371611696/work
+ipywidgets
+jedi
 Jinja2==2.11.2
 joblib==1.0.0
 jsonpatch==1.28
 jsonpointer==2.0
-jsonschema @ file:///tmp/build/80754af9/jsonschema_1601490578438/work
+jsonschema
 jupyter==1.0.0
-jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1601311786391/work
-jupyter-console @ file:///tmp/build/80754af9/jupyter_console_1598884538475/work
+jupyter-client
+jupyter-console
 jupyter-core==4.6.3
-jupyterlab-pygments @ file:///tmp/build/80754af9/jupyterlab_pygments_1601490720602/work
+jupyterlab-pygments
 kiwisolver==1.2.0
 MarkupSafe==1.1.1
-matplotlib @ file:///tmp/build/80754af9/matplotlib-base_1597876319132/work
+matplotlib
 mistune==0.8.4
 mkl-fft==1.2.0
 mkl-random==1.1.1
 mkl-service==2.3.0
--e git+https://github.com/VICO-UoE/mlpractical.git@b93368f832b17f94361ab17c2a20b21464327e3b#egg=mlp
 munch==2.5.0
-nbclient @ file:///tmp/build/80754af9/nbclient_1601059699549/work
-nbconvert @ file:///tmp/build/80754af9/nbconvert_1601069204803/work
+nbclient
+nbconvert
 nbformat==5.0.7
-nest-asyncio @ file:///tmp/build/80754af9/nest-asyncio_1601499549014/work
+nest-asyncio
 networkx==2.5
-notebook @ file:///tmp/build/80754af9/notebook_1601501575118/work
-numpy @ file:///tmp/build/80754af9/numpy_and_numpy_base_1596233721170/work
+notebook
+numpy
 olefile==0.46
 opencv-python==4.5.1.48
 opencv-python-headless==4.5.1.48
@@ -57,24 +56,24 @@ pandocfilters==1.4.2
 parso==0.7.0
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow @ file:///tmp/build/80754af9/pillow_1594307295532/work
+Pillow
 pretrainedmodels==0.7.4
 prometheus-client==0.8.0
-prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1598885458782/work
+prompt-toolkit
 protobuf==3.10.0
 ptyprocess==0.6.0
-pycparser @ file:///tmp/build/80754af9/pycparser_1594388511720/work
+pycparser
 pyglet==1.5.0
-Pygments @ file:///tmp/build/80754af9/pygments_1600458456400/work
+Pygments
 pygraphviz==1.7
 pyparsing==2.4.7
-pyrsistent @ file:///tmp/build/80754af9/pyrsistent_1600141720057/work
+pyrsistent
 python-dateutil==2.8.1
 pytz==2021.1
 PyWavelets==1.1.1
 PyYAML==5.4.1
 pyzmq==19.0.2
-qtconsole @ file:///tmp/build/80754af9/qtconsole_1600870028330/work
+qtconsole
 QtPy==1.9.0
 requests==2.25.1
 scikit-image==0.18.1
@@ -95,10 +94,10 @@ torchfile==0.1.0
 torchvision==0.5.0
 tornado==6.0.4
 tqdm==4.36.1
-traitlets @ file:///tmp/build/80754af9/traitlets_1600712396819/work
+traitlets
 urllib3==1.26.3
 visdom==0.1.8.9
-wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
+wcwidth
 webencodings==0.5.1
 websocket-client==0.57.0
 widgetsnbextension==3.5.1
