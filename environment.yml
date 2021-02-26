@@ -120,22 +120,33 @@ dependencies:
   - zstd=1.4.5=h9ceee32_0
   - pip:
     - albumentations==0.5.2
+    - chardet==4.0.0
+    - idna==2.10
     - imageio==2.9.0
     - imgaug==0.4.0
+    - jsonpatch==1.28
+    - jsonpointer==2.0
     - munch==2.5.0
     - networkx==2.5
     - opencv-python==4.5.1.48
     - opencv-python-headless==4.5.1.48
+    - pandas==1.2.2
     - pretrainedmodels==0.7.4
     - protobuf==3.10.0
     - pygraphviz==1.7
+    - pytz==2021.1
     - pywavelets==1.1.1
     - pyyaml==5.4.1
+    - requests==2.25.1
     - scikit-image==0.18.1
     - shapely==1.7.1
     - tensorboardx==1.9
     - tifffile==2021.2.1
     - torch==1.4.0
+    - torchfile==0.1.0
     - torchvision==0.5.0
     - tqdm==4.36.1
+    - urllib3==1.26.3
+    - visdom==0.1.8.9
+    - websocket-client==0.57.0
 prefix: /home/tiagopgle/miniconda3/envs/mlp
