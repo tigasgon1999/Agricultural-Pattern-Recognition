@@ -19,6 +19,39 @@ from PIL import Image
 import matplotlib
 import matplotlib.pyplot as plt
 
+from config.configs_kf import *
+
+
+prepare_gt(VAL_ROOT)
+prepare_gt(TRAIN_ROOT)
+
+train_args = agriculture_configs(net_name='MSCG-Rx50',
+                                 data='Agriculture',
+                                 bands_list=['NIR', 'RGB'],
+                                 kf=0, k_folder=0,
+                                 note='reproduce_ACW_loss2_adax'
+                                 )
+
+train_args.input_size = [512, 512]
+train_args.scale_rate = 1.  # 256./512.  # 448.0/512.0 #1.0/1.0
+train_args.val_size = [512, 512]
+train_args.node_size = (32, 32)
+train_args.train_batch = 10
+train_args.val_batch = 10
+
+train_args.lr = 1.5e-4 / np.sqrt(3)
+train_args.weight_decay = 2e-5
+
+train_args.lr_decay = 0.9
+train_args.max_iter = 1e8
+
+train_args.snapshot = ''
+
+train_args.print_freq = 1
+train_args.save_pred = False
+# output training configuration to a text file
+train_args.ckpt_path=os.path.abspath(os.curdir)
+
 
 def get_argparser():
     parser = argparse.ArgumentParser()
@@ -27,7 +60,7 @@ def get_argparser():
     parser.add_argument("--data_root", type=str, default='./datasets/data',
                         help="path to Dataset")
     parser.add_argument("--dataset", type=str, default='voc',
-                        choices=['voc', 'cityscapes'], help='Name of dataset')
+                        choices=['voc', 'cityscapes', 'agr'], help='Name of dataset')
     parser.add_argument("--num_classes", type=int, default=None,
                         help="num classes (default: None)")
 
@@ -231,8 +264,12 @@ def main():
     # Setup dataloader
     if opts.dataset=='voc' and not opts.crop_val:
         opts.val_batch_size = 1
+
+    if opts.dataset == 'agr':
+        train_dst, val_dst = train_args.get_dataset()
+    else:
+        train_dst, val_dst = get_dataset(opts)
     
-    train_dst, val_dst = get_dataset(opts)
     train_loader = data.DataLoader(
         train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
     val_loader = data.DataLoader(
@@ -259,6 +296,7 @@ def main():
     metrics = StreamSegMetrics(opts.num_classes)
 
     # Set up optimizer
+    model_dict = model.backbone.state_dict()
     optimizer = torch.optim.SGD(params=[
         {'params': model.backbone.parameters(), 'lr': 0.1*opts.lr},
         {'params': model.classifier.parameters(), 'lr': opts.lr},
