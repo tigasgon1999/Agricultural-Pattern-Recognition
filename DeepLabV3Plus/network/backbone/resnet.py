@@ -1,3 +1,4 @@
+from os import stat_result
 import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
@@ -136,7 +137,7 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(4, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -215,7 +216,15 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
-        model.load_state_dict(state_dict)
+        filtered_dict = {k: v for k, v in state_dict.items() if k != 'conv1.weight'}
+        model_dict = model.state_dict()
+        model_dict.update(filtered_dict)                                              
+        model.load_state_dict(model_dict)
+        with torch.no_grad():
+            model.conv1.weight[:, :3, :, :] = state_dict['conv1.weight']
+            model.conv1.weight[:, 3, :, :] = state_dict['conv1.weight'][:, 2, :, :]
+        model_dict = model.state_dict()
+
     return model
 
 
