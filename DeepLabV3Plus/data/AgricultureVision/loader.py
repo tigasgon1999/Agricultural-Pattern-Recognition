@@ -105,3 +105,8 @@ class AlgricultureDataset(Dataset):
         norm = standard_transforms.Compose([standard_transforms.Normalize(*mean_std)])
         return norm(img)
 
+    @classmethod
+    def decode_target(cls, target):
+        target[target == 255] = 19
+        #target = target.astype('uint8') + 1
+        return cls.train_id_to_color[target]
