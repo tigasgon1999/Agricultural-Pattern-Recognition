@@ -7,7 +7,7 @@ ckpt1 = {
     'data': 'Agriculture',
     'bands': ['NIR','RGB'],
     'nodes': (32,32),
-    'snapshot': '../ckpt/epoch_8_loss_0.99527_acc_0.82278_acc-cls_0.60967_'
+    'snapshot': 'ckpt/epoch_8_loss_0.99527_acc_0.82278_acc-cls_0.60967_'
                 'mean-iu_0.48098_fwavacc_0.70248_f1_0.62839_lr_0.0000829109.pth'
 }
 
