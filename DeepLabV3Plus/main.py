@@ -215,8 +215,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     image = images[i].detach().cpu().numpy()
                     target = targets[i]
                     pred = preds[i]
-
-                    image = (denorm(image) * 255).transpose(1, 2, 0).astype(np.uint8)
+                    print(f"Image shape = {image.shape()}")
+                    print(f"RGB image shape = {image[:-1].shape()}")
+                    image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                     target = loader.dataset.decode_target(target).astype(np.uint8)
                     pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
