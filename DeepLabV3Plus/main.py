@@ -239,9 +239,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
                     Image.fromarray(image).save('results/%d_image.png' % img_id)
                     Image.fromarray(target).save('results/%d_target.png' % img_id)
-                    Image.fromarray(target_norm).save('results/%d_target_norm.png' % img_id)
                     Image.fromarray(pred).save('results/%d_pred.png' % img_id)
-                    Image.fromarray(pred_norm).save('results/%d_pred_norm.png' % img_id)
 
                     fig = plt.figure()
                     plt.imshow(image)
