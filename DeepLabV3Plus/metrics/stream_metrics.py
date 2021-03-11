@@ -77,6 +77,7 @@ class StreamSegMetrics(_StreamMetrics):
                 "FreqW Acc": fwavacc,
                 "Mean IoU": mean_iu,
                 "Class IoU": cls_iu,
+                "Confusion matrix":, self.confusion_matrix,
             }
         
     def reset(self):
