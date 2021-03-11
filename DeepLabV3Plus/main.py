@@ -20,6 +20,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from config.configs_kf import *
+import pandas as pd
 
 
 prepare_gt(VAL_ROOT)
@@ -71,7 +72,7 @@ def get_argparser():
                                  'deeplabv3_mobilenet', 'deeplabv3plus_mobilenet'], help='model name')
     parser.add_argument("--separable_conv", action='store_true', default=False,
                         help="apply separable conv to decoder and aspp")
-    parser.add_argument("--output_stride", type=int, default=16, choices=[8, 16])
+    parser.add_argument("--output_stride", type=int, default=16, choices=[8, 16, 32])
 
     # Train Options
     parser.add_argument("--test_only", action='store_true', default=False)
@@ -243,9 +244,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     plt.close()
                     img_id += 1
 
-                    if i == 50:
+                    if i == 25:
                         break
-
+            
         score = metrics.get_results()
     return score, ret_samples
 
@@ -374,6 +375,23 @@ def main():
         print(metrics.to_str(val_score))
         return
 
+    # Initializae placeholders for results
+    mIoUs = [] 
+    classIoUs0 = []
+    classIoUs1 = []
+    classIoUs2 = []
+    classIoUs3 = []
+    classIoUs4 = []
+    classIoUs5 = []
+    classIoUs6 = []
+    train_losses = []
+    iterations_train = []
+    iterations_val = []
+    mean_accuracies = []
+    overall_accuracies = []
+    train_epochs = []
+    val_epochs = []
+
     interval_loss = 0
     while True: #cur_itrs < opts.total_itrs:
         # =====  Train  =====
@@ -400,6 +418,10 @@ def main():
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
+
+                train_losses.append(interval_loss)
+                iterations_train.append(cur_itrs)
+                train_epochs.append(cur_epochs)
                 interval_loss = 0.0
 
             if (cur_itrs) % opts.val_interval == 0:
@@ -410,6 +432,23 @@ def main():
                 val_score, ret_samples = validate(
                     opts=opts, model=model, loader=val_loader, device=device, metrics=metrics, ret_samples_ids=vis_sample_id)
                 print(metrics.to_str(val_score))
+
+                # Save results
+                if opts.save_val_results:
+                    mIoUs.append(val_score['Mean IoU'])
+                    classIoUs0.append(val_score['Class IoU'][0])
+                    classIoUs1.append(val_score['Class IoU'][1])
+                    classIoUs2.append(val_score['Class IoU'][2])
+                    classIoUs3.append(val_score['Class IoU'][3])
+                    classIoUs4.append(val_score['Class IoU'][4])
+                    classIoUs5.append(val_score['Class IoU'][5])
+                    classIoUs6.append(val_score['Class IoU'][6])
+                    mean_accuracies.append(val_score['Mean Acc'])
+                    overall_accuracies.append(val_score['Overall Acc'])
+                    iterations_val.append(cur_itrs)
+                    val_epochs.append(cur_epochs)
+                    np.save(f"./results/progress/os_{opts.output_stride}/confusion_matrix.npy", val_score['Confusion matrix'])
+
                 if val_score['Mean IoU'] > best_score:  # save best model
                     best_score = val_score['Mean IoU']
                     save_ckpt('checkpoints/best_%s_%s_os%d.pth' %
@@ -430,6 +469,30 @@ def main():
             scheduler.step()  
 
             if cur_itrs >=  opts.total_itrs:
+                output_dict = {}
+                output_dict['Epochs'] = val_epochs
+                output_dict['Iterations'] = iterations_val
+                output_dict['Mean IoUs'] = mIoUs
+                output_dict['Class 0 IoU'] = classIoUs0
+                output_dict['Class 1 IoU'] = classIoUs1
+                output_dict['Class 2 IoU'] = classIoUs2
+                output_dict['Class 3 IoU'] = classIoUs3
+                output_dict['Class 4 IoU'] = classIoUs4
+                output_dict['Class 5 IoU'] = classIoUs5
+                output_dict['Class 6 IoU'] = classIoUs6
+                output_dict['Mean Accs.'] = mean_accuracies
+                output_dict['Overall Accs.'] = overall_accuracies
+
+                train_dict = {}
+                train_dict['Epochs'] = train_epochs
+                train_dict['Iterations'] = iterations_train
+                train_dict['Loss'] = train_losses
+
+                output_df = pd.DataFrame.from_dict(output_dict)
+                train_df = pd.DataFrame.from_dict(train_dict)
+
+                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/eval_results.csv")
+                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/train_results.csv")
                 return
 
         
