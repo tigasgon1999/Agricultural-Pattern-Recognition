@@ -215,27 +215,10 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     image = images[i].detach().cpu().numpy()
                     target = targets[i]
                     pred = preds[i]
-                    #print(f"Image shape = {image.shape}")
-                    #print(f"Target shape = {target.shape}")
-                    #print(f"Pred shape = {pred.shape}")
-                    #print(f"RGB image shape = {image[:-1].shape}")
-                    #print(f"Image: {image}")
-                    #print(f"Targets type: {target.type}")
-                    #print(f"Prediction type: {pred.type}")
 
                     image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                     pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                     target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
-
-                    #print("Image shape:", image.shape)
-                    #print("Pred shape:", pred.shape)
-                    #print("target shape:", target.shape)
-
-                    #print("Transposed shape:", image.shape)
-                    #image = (denorm(image[:-1]) * 255).astype(np.uint8)
-
-                    #target = loader.dataset.decode_target(target).astype(np.uint8)
-                    #pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
                     Image.fromarray(image).save('results/%d_image.png' % img_id)
                     Image.fromarray(target).save('results/%d_target.png' % img_id)
@@ -251,6 +234,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
                     plt.close()
                     img_id += 1
+
+                    if i == 50:
+                        break
 
         score = metrics.get_results()
     return score, ret_samples
