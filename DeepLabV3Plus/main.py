@@ -220,8 +220,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     print(f"Pred shape = {pred.shape}")
                     print(f"RGB image shape = {image[:-1].shape}")
                     print(f"Image: {image}")
-                    print(f"Targets: {target}")
-                    print(f"Prediction: {pred}")
+                    print(f"Targets type: {target.type}")
+                    print(f"Prediction type: {pred.type}")
 
                     image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                     pred = (denorm(pred)).astype(np.uint8)
