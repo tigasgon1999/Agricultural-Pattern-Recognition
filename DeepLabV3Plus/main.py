@@ -197,7 +197,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
         if not os.path.exists('results/images'):
             os.mkdir('results/images')
         if not os.path.exists(f'results/images/os_{opts.output_stride}'):
-            os.mkdir(f'results/progress/os_{opts.output_stride}')
+            os.mkdir(f'results/images/os_{opts.output_stride}')
         if not os.path.exists('results/progress'):
             os.mkdir('results/progress')
         if not os.path.exists(f'results/progress/os_{opts.output_stride}'):
