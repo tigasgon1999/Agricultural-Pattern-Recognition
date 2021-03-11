@@ -225,10 +225,10 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
                     image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                     pred = (denorm(pred)).astype(np.uint8)
-                    pred = np.array([pred,pred,pred]) #.transpose(1, 2, 0).astype(np.uint8)                    
+                    pred = np.dstack((pred,pred,pred)) #.transpose(1, 2, 0).astype(np.uint8)                    
                     #pred_norm = pred.astype(np.uint8)
                     target = denorm(target).astype(np.uint8)
-                    target = np.array([target,target,target]) #.transpose(1, 2, 0).astype(np.uint8)                    
+                    target = np.dstack((target,target,target)) #.transpose(1, 2, 0).astype(np.uint8)                    
 
                     print("Image shape:", image.shape)
                     print("Pred shape:", pred.shape)
