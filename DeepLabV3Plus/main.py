@@ -77,7 +77,7 @@ def get_argparser():
     parser.add_argument("--test_only", action='store_true', default=False)
     parser.add_argument("--save_val_results", action='store_true', default=False,
                         help="save segmentation results to \"./results\"")
-    parser.add_argument("--total_itrs", type=int, default=30e3,
+    parser.add_argument("--total_itrs", type=int, default=10e2,
                         help="epoch number (default: 30k)")
     parser.add_argument("--lr", type=float, default=0.01,
                         help="learning rate (default: 0.01)")
@@ -191,6 +191,14 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
+        if not os.path.exists('results/images'):
+            os.mkdir('results/images')
+        if not os.path.exists(f'results/images/os_{opts.output_stride}'):
+            os.mkdir(f'results/progress/os_{opts.output_stride}')
+        if not os.path.exists('results/progress'):
+            os.mkdir('results/images')
+        if not os.path.exists(f'results/progress/os_{opts.output_stride}'):
+            os.mkdir(f'results/progress/os_{opts.output_stride}')
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
@@ -220,9 +228,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                     target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
 
-                    Image.fromarray(image).save('results/%d_image.png' % img_id)
-                    Image.fromarray(target).save('results/%d_target.png' % img_id)
-                    Image.fromarray(pred).save('results/%d_pred.png' % img_id)
+                    Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
+                    Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
+                    Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
 
                     fig = plt.figure()
                     plt.imshow(image)
