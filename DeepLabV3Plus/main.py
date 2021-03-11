@@ -196,7 +196,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
         if not os.path.exists(f'results/images/os_{opts.output_stride}'):
             os.mkdir(f'results/progress/os_{opts.output_stride}')
         if not os.path.exists('results/progress'):
-            os.mkdir('results/images')
+            os.mkdir('results/progress')
         if not os.path.exists(f'results/progress/os_{opts.output_stride}'):
             os.mkdir(f'results/progress/os_{opts.output_stride}')
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
