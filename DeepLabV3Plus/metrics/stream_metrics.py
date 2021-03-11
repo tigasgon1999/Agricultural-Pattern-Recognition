@@ -38,7 +38,7 @@ class StreamSegMetrics(_StreamMetrics):
     def to_str(results):
         string = "\n"
         for k, v in results.items():
-            if k!="Class IoU":
+            if k!="Class IoU" and k!="Confusion matrix":
                 string += "%s: %f\n"%(k, v)
         
         #string+='Class IoU:\n'
