@@ -189,6 +189,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
     ret_samples = []
+    counter = 0
+    n_images = 50
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
@@ -206,7 +208,6 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
     with torch.no_grad():
         for i, (images, labels) in tqdm(enumerate(loader)):
-            
             images = images.to(device, dtype=torch.float32)
             labels = labels.to(device, dtype=torch.long)
 
@@ -220,32 +221,34 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     (images[0].detach().cpu().numpy(), targets[0], preds[0]))
 
             if opts.save_val_results:
-                for i in range(len(images)):
-                    image = images[i].detach().cpu().numpy()
-                    target = targets[i]
-                    pred = preds[i]
+                for j in range(len(images)):
+                    counter = i+j 
+                    if counter <= n_images:
+                        image = images[j].detach().cpu().numpy()
+                        target = targets[j]
+                        pred = preds[j]
 
-                    image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                    pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
-                    target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
+                        image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
+                        pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
+                        target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
 
-                    Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
-                    Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
-                    Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
+                        Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
+                        Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
+                        Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
 
-                    fig = plt.figure()
-                    plt.imshow(image)
-                    plt.axis('off')
-                    plt.imshow(pred, alpha=0.7)
-                    ax = plt.gca()
-                    ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
-                    plt.close()
-                    img_id += 1
+                        fig = plt.figure()
+                        plt.imshow(image)
+                        plt.axis('off')
+                        plt.imshow(pred, alpha=0.7)
+                        ax = plt.gca()
+                        ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                        ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                        plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
+                        plt.close()
+                        img_id += 1
 
-                    if i == 25:
-                        break
+            if i == 10:
+                break
             
         score = metrics.get_results()
     return score, ret_samples
