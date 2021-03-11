@@ -213,7 +213,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
             if opts.save_val_results:
                 for i in range(len(images)):
                     image = images[i].detach().cpu().numpy()
-                    image_T = images[i].detach().cpu().numpy()
+                    image_T = np.copy(image) #images[i].detach().cpu().numpy()
                     target = targets[i]
                     pred = preds[i]
                     print(f"Image shape = {image.shape}")
@@ -221,11 +221,14 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     print(f"Pred shape = {pred.shape}")
                     print(f"RGB image shape = {image[:-1].shape}")
                     print(f"Image: {image}")
+                    print(f"Image T: {image_T}")
                     print(f"Targets: {target}")
                     print(f"Prediction: {pred}")
 
                     image_T = (denorm(image_T[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
+                    print("Transposed shape:", image_T)
                     image = (denorm(image[:-1]) * 255).astype(np.uint8)
+
                     #target = loader.dataset.decode_target(target).astype(np.uint8)
                     #pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
