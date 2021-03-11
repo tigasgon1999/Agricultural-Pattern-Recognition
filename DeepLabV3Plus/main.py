@@ -243,7 +243,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         ax = plt.gca()
                         ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                         ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        plt.savefig(f'results/images/os_{opts.output_stride}/{image_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                        plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
                         plt.close()
                         img_id += 1
 
