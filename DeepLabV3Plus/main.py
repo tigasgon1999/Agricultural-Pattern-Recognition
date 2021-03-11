@@ -229,6 +229,10 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     target = denorm(target).astype(np.uint8)
                     target_norm = target.astype(np.uint8)
 
+                    target = np.array([target,target,target])
+
+                    print("Pred shape:", pred.shape)
+
                     #print("Transposed shape:", image.shape)
                     #image = (denorm(image[:-1]) * 255).astype(np.uint8)
 
