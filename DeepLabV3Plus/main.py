@@ -226,7 +226,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     print(f"Prediction: {pred}")
 
                     image_T = (denorm(image_T[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                    print("Transposed shape:", image_T)
+                    print("Transposed shape:", image_T.shape)
                     image = (denorm(image[:-1]) * 255).astype(np.uint8)
 
                     #target = loader.dataset.decode_target(target).astype(np.uint8)
