@@ -215,11 +215,11 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     image = images[i].detach().cpu().numpy()
                     target = targets[i]
                     pred = preds[i]
-                    print(f"Image shape = {image.shape}")
-                    print(f"Target shape = {target.shape}")
-                    print(f"Pred shape = {pred.shape}")
-                    print(f"RGB image shape = {image[:-1].shape}")
-                    print(f"Image: {image}")
+                    #print(f"Image shape = {image.shape}")
+                    #print(f"Target shape = {target.shape}")
+                    #print(f"Pred shape = {pred.shape}")
+                    #print(f"RGB image shape = {image[:-1].shape}")
+                    #print(f"Image: {image}")
                     #print(f"Targets type: {target.type}")
                     #print(f"Prediction type: {pred.type}")
 
@@ -227,9 +227,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                     target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
 
-                    print("Image shape:", image.shape)
-                    print("Pred shape:", pred.shape)
-                    print("target shape:", target.shape)
+                    #print("Image shape:", image.shape)
+                    #print("Pred shape:", pred.shape)
+                    #print("target shape:", target.shape)
 
                     #print("Transposed shape:", image.shape)
                     #image = (denorm(image[:-1]) * 255).astype(np.uint8)
