@@ -218,8 +218,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     print(f"Image shape = {image.shape}")
                     print(f"RGB image shape = {image[:-1].shape}")
                     image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                    target = loader.dataset.decode_target(target).astype(np.uint8)
-                    pred = loader.dataset.decode_target(pred).astype(np.uint8)
+                    #target = loader.dataset.decode_target(target).astype(np.uint8)
+                    #pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
                     Image.fromarray(image).save('results/%d_image.png' % img_id)
                     Image.fromarray(target).save('results/%d_target.png' % img_id)
