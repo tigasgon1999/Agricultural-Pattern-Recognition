@@ -190,7 +190,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    n_images = 50
+    n_images = 10
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
@@ -246,9 +246,6 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
                         plt.close()
                         img_id += 1
-
-            if i == 10:
-                break
             
         score = metrics.get_results()
     return score, ret_samples
@@ -494,8 +491,8 @@ def main():
                 output_df = pd.DataFrame.from_dict(output_dict)
                 train_df = pd.DataFrame.from_dict(train_dict)
 
-                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/eval_results.csv")
-                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/train_results.csv")
+                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/eval_results.csv", index = False)
+                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/train_results.csv", index = False)
                 return
 
         
