@@ -213,7 +213,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
             if opts.save_val_results:
                 for i in range(len(images)):
                     image = images[i].detach().cpu().numpy()
-                    image_T = np.copy(image) #images[i].detach().cpu().numpy()
+                    image_T = image.copy() #images[i].detach().cpu().numpy()
                     target = targets[i]
                     pred = preds[i]
                     print(f"Image shape = {image.shape}")
