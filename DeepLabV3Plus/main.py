@@ -190,7 +190,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    image_interval = 100
+    image_interval = 50
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
@@ -240,9 +240,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                             pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                             target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
 
-                            Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
-                            Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
-                            Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
+                            Image.fromarray(image).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_image.png')
+                            Image.fromarray(target).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_target.png')
+                            Image.fromarray(pred).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_pred.png')
 
                             fig = plt.figure()
                             plt.imshow(image)
@@ -251,7 +251,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                             ax = plt.gca()
                             ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                             ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                            plt.savefig(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
                             plt.close()
                             img_id += 1
                     
