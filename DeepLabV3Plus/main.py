@@ -190,7 +190,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    n_images = 30
+    image_interval = 250
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
@@ -223,7 +223,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
             if opts.save_val_results:
                 for j in range(len(images)):
                     counter = i+j 
-                    if counter <= n_images:
+                    if counter == image_interval:
                         image = images[j].detach().cpu().numpy()
                         target = targets[j]
                         pred = preds[j]
