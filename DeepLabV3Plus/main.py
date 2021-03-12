@@ -235,7 +235,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
                     if not is_all_zero:
                         if counter % image_interval == 0:
-                            print(f"Nonzero Prediction = \n{pred}")
+                            #print(f"Nonzero Prediction = \n{pred}")
                             image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                             pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                             target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
@@ -257,7 +257,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     
                     else:
                         if counter % image_interval == 0:
-                            print(f"Zero Prediction = \n{pred}")
+                            #print(f"Zero Prediction = \n{pred}")
 
                             image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                             pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
