@@ -190,7 +190,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    n_images = 10
+    n_images = 30
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
