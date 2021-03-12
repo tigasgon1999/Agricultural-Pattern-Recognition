@@ -492,7 +492,7 @@ def main():
                 train_df = pd.DataFrame.from_dict(train_dict)
 
                 output_df.to_csv(f"./results/progress/os_{opts.output_stride}/eval_results.csv", index = False)
-                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/train_results.csv", index = False)
+                train_df.to_csv(f"./results/progress/os_{opts.output_stride}/train_results.csv", index = False)
                 return
 
         
