@@ -5,6 +5,7 @@ import os
 import random
 import argparse
 import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
@@ -258,7 +259,6 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     else:
                         if counter % image_interval == 0:
                             #print(f"Zero Prediction = \n{pred}")
-
                             image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                             pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                             target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
