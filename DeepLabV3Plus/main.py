@@ -4,7 +4,9 @@ import utils
 import os
 import random
 import argparse
+import sys
 import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
@@ -189,8 +191,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
     ret_samples = []
-    counter = 0
-    image_interval = 50
+    counter = 50
+    image_interval = 1
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
@@ -230,16 +232,23 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     image = images[j].detach().cpu().numpy()
                     target = targets[j]
                     pred = preds[j]
+                    label = labels.numpy()
 
                     is_all_zero = np.all((pred == 0))
 
                     if not is_all_zero:
                         if counter % image_interval == 0:
-                            #print(f"Nonzero Prediction = \n{pred}")
-                            image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
+                            # Visualize results from real image 
+                            image = np.delete(image, 0, 0)                         
+                            image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
+                            
+                            # Visualize results from prediction
                             pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
+                            pred = pred*255
+                            pred = np.clip(pred, 0, 255)                     
+                            
+                            # Visualize results from target
                             target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
-
                             Image.fromarray(image).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_image.png')
                             Image.fromarray(target).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_target.png')
                             Image.fromarray(pred).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_pred.png')
@@ -247,19 +256,21 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                             fig = plt.figure()
                             plt.imshow(image)
                             plt.axis('off')
-                            plt.imshow(pred, alpha=0.7)
+                            plt.imshow(pred, alpha=0.35)
                             ax = plt.gca()
                             ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                             ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
                             plt.savefig(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                            plt.show()
                             plt.close()
                             img_id += 1
                     
                     else:
                         if counter % image_interval == 0:
-                            #print(f"Zero Prediction = \n{pred}")
+                            oldimage = image
+                            image = np.delete(oldimage, 0, 0)                         
+                            image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it
 
-                            image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
                             pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
                             target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
 
@@ -270,7 +281,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                             fig = plt.figure()
                             plt.imshow(image)
                             plt.axis('off')
-                            plt.imshow(pred, alpha=0.7)
+                            plt.imshow(pred, alpha=0.35)
                             ax = plt.gca()
                             ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                             ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
@@ -446,7 +457,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 10 == 0:
+            if (cur_itrs) % 1 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))

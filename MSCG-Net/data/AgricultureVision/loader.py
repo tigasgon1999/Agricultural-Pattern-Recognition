@@ -3,7 +3,7 @@ from data.augmt import *
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as standard_transforms
-
+print("Imported most loader.py ...")
 from data.AgricultureVision.pre_process import *
 
 cv2.setNumThreads(0)

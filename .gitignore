@@ -3,13 +3,9 @@ ckpt/
 mlpractical/
 Agriculture-Vision.tar.gz
 Dataset/Agriculture-Vision.tar.gz
+Dataset/Reduced_dataset
 env/
 /google-cloud-sdk
 /google-cloud-sdk.staging
-<<<<<<< HEAD
 Dataset/Agriculture-Vision.tar.gz?dl=0
 google-cloud-sdk-269.0.0-linux-x86_64.tar.gz
-=======
-google-cloud-sdk-269.0.0-linux-x86_64.tar.gz
-/Dataset/Agriculture-Vision.tar.gz?dl=0
->>>>>>> 932ec80e0b3ebe62b067a1cbc3e887dd879d7bd9
