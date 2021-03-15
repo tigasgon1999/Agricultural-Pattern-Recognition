@@ -249,7 +249,6 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         image = images[j].detach().cpu().numpy()
                         target = targets[j]
                         pred = preds[j]
-                        label = labels.numpy() #[1:]
 
                         # Reformat real image 
                         image = np.delete(image, 0, 0) # Delete NIR channel                        
@@ -453,7 +452,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 1 == 0:
+            if (cur_itrs) % 10 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
