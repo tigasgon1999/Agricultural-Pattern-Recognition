@@ -4,8 +4,9 @@ import utils
 import os
 import random
 import argparse
+import sys
 import numpy as np
-#np.set_printoptions(threshold=sys.maxsize)
+np.set_printoptions(threshold=sys.maxsize)
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
@@ -191,14 +192,10 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    image_interval = 50
+    image_interval = 1
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
-        if not os.path.exists('results/nonzero_images'):
-            os.mkdir('results/nonzero_images')
-        if not os.path.exists(f'results/nonzero_images/os_{opts.output_stride}'):
-            os.mkdir(f'results/nonzero_images/os_{opts.output_stride}')
         if not os.path.exists('results/images'):
             os.mkdir('results/images')
         if not os.path.exists(f'results/images/os_{opts.output_stride}'):
@@ -227,57 +224,59 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
             if opts.save_val_results:
                 for j in range(len(images)):
-                    counter = i+j 
-                    image = images[j].detach().cpu().numpy()
-                    target = targets[j]
-                    pred = preds[j]
+                    counter = i+j
+                    if counter % image_interval == 0:
+                        image = images[j].detach().cpu().numpy()
+                        target = targets[j]
+                        pred = preds[j]
+                        label = labels.numpy() #[1:]
 
-                    is_all_zero = np.all((pred == 0))
+                        is_all_zero = np.all((label == 4))
 
-                    if not is_all_zero:
-                        if counter % image_interval == 0:
-                            #print(f"Nonzero Prediction = \n{pred}")
-                            image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                            pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
-                            target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
+                        if 1 in pred:
+                            print("Found class 1")
+                        if 2 in pred:
+                            print("Found class 2")
+                        if 3 in pred:
+                            print("Found class 3")
+                        if 4 in pred:
+                            print("Found class 4")
+                        if 5 in pred:
+                            print("Found class 5")
+                        if 6 in pred:
+                            print("Found class 6")
+                        if 7 in pred:
+                            print("Found class 7")
+                        if 8 in pred:
+                            print("Found class 8")
 
-                            Image.fromarray(image).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_image.png')
-                            Image.fromarray(target).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_target.png')
-                            Image.fromarray(pred).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_pred.png')
+                        # Visualize results from real image 
+                        image = np.delete(image, 0, 0)                         
+                        image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
+                        
+                        # Visualize results from prediction
+                        new_pred = np.array([pred,pred,pred])
+                        pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
+                        pred = pred*255
+                        pred = np.clip(pred, 0, 255)                     
+                        
+                        # Visualize results from target
+                        target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
+                        Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
+                        Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
+                        Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
 
-                            fig = plt.figure()
-                            plt.imshow(image)
-                            plt.axis('off')
-                            plt.imshow(pred, alpha=0.7)
-                            ax = plt.gca()
-                            ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            plt.savefig(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
-                            plt.close()
-                            img_id += 1
-                    
-                    else:
-                        if counter % image_interval == 0:
-                            #print(f"Zero Prediction = \n{pred}")
-                            image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                            pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
-                            target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
-
-                            Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
-                            Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
-                            Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
-
-                            fig = plt.figure()
-                            plt.imshow(image)
-                            plt.axis('off')
-                            plt.imshow(pred, alpha=0.7)
-                            ax = plt.gca()
-                            ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
-                            plt.close()
-                            img_id += 1
-
+                        fig = plt.figure()
+                        plt.imshow(image)
+                        plt.axis('off')
+                        plt.imshow(pred, alpha=0.35)
+                        ax = plt.gca()
+                        ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                        ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                        plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                        #plt.show()
+                        plt.close()
+                        img_id += 1
             
         score = metrics.get_results()
     return score, ret_samples

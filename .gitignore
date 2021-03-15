@@ -3,6 +3,7 @@ ckpt/
 mlpractical/
 Agriculture-Vision.tar.gz
 Dataset/Agriculture-Vision.tar.gz
+Dataset/Reduced_dataset
 env/
 /google-cloud-sdk
 /google-cloud-sdk.staging

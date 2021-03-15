@@ -1,3 +1,4 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.pythonPath": "/afs/inf.ed.ac.uk/user/s21/s2118610/miniconda3/envs/deeplabmlp/bin/python"
 }
