@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 from config.configs_kf import *
 import pandas as pd
 
-
 prepare_gt(VAL_ROOT)
 prepare_gt(TRAIN_ROOT)
 
@@ -190,7 +189,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    image_interval = 50
+    image_interval = 100
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
