@@ -278,6 +278,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                             print("Class 6 in target")
                         if 255 in target:
                             print("255 in target why tho??")
+                        
 
                         # Reformat results from target
                         target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
