@@ -4,7 +4,9 @@ import utils
 import os
 import random
 import argparse
+import sys
 import numpy as np
+np.set_printoptions(threshold=sys.maxsize)
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
@@ -183,6 +185,26 @@ def get_dataset(opts):
                              split='val', transform=val_transform)
     return train_dst, val_dst
 
+def pixel_mapper(pixel_map):
+    class_map = {
+    0 : (0, 0, 0),        # background (Black)
+    1 : (255, 255, 0),    # cloud_shadow (Yellow)
+    2 : (255, 0, 255),    # double_plant (Purple)
+    3 : (0, 255, 0),      # planter_skip (Green)
+    4 : (0, 0, 255),      # standing_water (Blue)
+    5 : (255, 255, 255),  # waterway (White)
+    6 : (0, 255, 255),    # weed_cluster (Cian)
+    }
+    # Get new RGB channels
+    R = pixel_map
+    G = pixel_map
+    B = pixel_map
+    for classe in class_map.keys():
+        R = np.where(R == classe, class_map[classe][0], R)
+        G = np.where(G == classe, class_map[classe][1], G)
+        B = np.where(B == classe, class_map[classe][2], B)
+
+    return R,G,B
 
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
@@ -193,10 +215,6 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
-        if not os.path.exists('results/nonzero_images'):
-            os.mkdir('results/nonzero_images')
-        if not os.path.exists(f'results/nonzero_images/os_{opts.output_stride}'):
-            os.mkdir(f'results/nonzero_images/os_{opts.output_stride}')
         if not os.path.exists('results/images'):
             os.mkdir('results/images')
         if not os.path.exists(f'results/images/os_{opts.output_stride}'):
@@ -225,58 +243,48 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
             if opts.save_val_results:
                 for j in range(len(images)):
-                    counter = i+j 
-                    image = images[j].detach().cpu().numpy()
-                    target = targets[j]
-                    pred = preds[j]
+                    counter = i+j
+                    if counter % image_interval == 0:
+                        # Extract predictions, labels and image
+                        image = images[j].detach().cpu().numpy()
+                        target = targets[j]
+                        pred = preds[j]
+                        label = labels.numpy() #[1:]
 
-                    is_all_zero = np.all((pred == 0))
+                        # Reformat real image 
+                        image = np.delete(image, 0, 0) # Delete NIR channel                        
+                        image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
 
-                    if not is_all_zero:
-                        if counter % image_interval == 0:
-                            #print(f"Nonzero Prediction = \n{pred}")
-                            image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                            pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
-                            target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
+                        # Reformat results from prediction
+                        R_pred,G_pred,B_pred = pixel_mapper(pred)
+                        # Create 3D image
+                        formatted_pred = np.array([R_pred,G_pred,B_pred])
+                        # Prepare for printing format
+                        pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
+                        pred = np.clip(pred, 0, 255)  # Sanity check                   
 
-                            Image.fromarray(image).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_image.png')
-                            Image.fromarray(target).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_target.png')
-                            Image.fromarray(pred).save(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_pred.png')
-
-                            fig = plt.figure()
-                            plt.imshow(image)
-                            plt.axis('off')
-                            plt.imshow(pred, alpha=0.7)
-                            ax = plt.gca()
-                            ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            plt.savefig(f'results/nonzero_images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
-                            plt.close()
-                            img_id += 1
-                    
-                    else:
-                        if counter % image_interval == 0:
-                            #print(f"Zero Prediction = \n{pred}")
-
-                            image = (denorm(image[:-1]) * 255).transpose(1, 2, 0).astype(np.uint8)
-                            pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
-                            target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
-
-                            Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
-                            Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
-                            Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
-
-                            fig = plt.figure()
-                            plt.imshow(image)
-                            plt.axis('off')
-                            plt.imshow(pred, alpha=0.7)
-                            ax = plt.gca()
-                            ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                            plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
-                            plt.close()
-                            img_id += 1
-
+                        # Reformat results from target
+                        R_pred,G_pred,B_pred = pixel_mapper(target)
+                        # Create 3D image
+                        formatted_target = np.array([R_pred,G_pred,B_pred])
+                        target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
+                        # Save results from validation
+                        Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
+                        Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
+                        Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
+                        # Overlap images
+                        fig = plt.figure()
+                        plt.imshow(image)
+                        #plt.title("Printing overlay of target and image")
+                        plt.axis('off')
+                        plt.imshow(pred, alpha=0.35)
+                        ax = plt.gca()
+                        ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                        ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                        plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                        #plt.show()
+                        plt.close()
+                        img_id += 1
             
         score = metrics.get_results()
     return score, ret_samples
@@ -445,7 +453,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 10 == 0:
+            if (cur_itrs) % 1 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))

@@ -2,6 +2,7 @@ import os
 import numpy as np
 import datetime
 
+print('Imported initial configs_kf.py ...')
 from data.AgricultureVision.loader import *
 
 

@@ -11,7 +11,7 @@ import cv2
 
 # change DATASET ROOT to your dataset path
 DATASET_ROOT = '../Dataset/Agriculture-Vision'
-# Uncomment to test locally with rediced version of dataset
+# Uncomment to test locally with reduced version of dataset
 #DATASET_ROOT = '../Dataset/Reduced_dataset'
 
 TRAIN_ROOT = os.path.join(DATASET_ROOT, 'train')

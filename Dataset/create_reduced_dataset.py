@@ -2,9 +2,10 @@ import os
 from PIL import Image
 import glob
 
-TRAIN_SAMPLES = 500
-VAL_SAMPLES = 250
-TEST_SAMPLES = 100
+TRAIN_SAMPLES = 50
+VAL_SAMPLES = 25
+TEST_SAMPLES = 25
+
 data_new_dir = os.path.join(os.getcwd(), 'Reduced_dataset/')
 if not os.path.exists(data_new_dir):
 	print("Creating folders in ", data_new_dir)
@@ -34,9 +35,6 @@ def read_write_image(path, image_files, dir = 'train'):
 			current_image.save(out_file_name)
 
 	print("Created data in", output_dir)
-
-
-
 
 directories = ['boundaries', 'images/rgb', 'images/nir', 'labels/cloud_shadow', 
 'labels/double_plant', 'labels/planter_skip', 'labels/standing_water', 

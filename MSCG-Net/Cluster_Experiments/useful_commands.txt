@@ -11,7 +11,10 @@ rsync -ua --progress <local_path_of_data_to_transfer> <studentID>@mlp.inf.ed.ac.
 rsync -ua --progress <studentID>@mlp.inf.ed.ac.uk:/home/<studentID>/path/to/folder <local_path_of_data_to_transfer>
 
 # To check for jobs running
-squeue -u <user_id>
+squeue -u <jobr_id>
 
 # To show output from run
 cat slurm-<job_id>
+
+# To check for jobs running with code
+squeue | grep <student_id>
