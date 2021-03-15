@@ -24,7 +24,6 @@ import matplotlib.pyplot as plt
 from config.configs_kf import *
 import pandas as pd
 
-
 prepare_gt(VAL_ROOT)
 prepare_gt(TRAIN_ROOT)
 
@@ -212,7 +211,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     metrics.reset()
     ret_samples = []
     counter = 0
-    image_interval = 1
+    image_interval = 100
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
@@ -250,12 +249,11 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         image = images[j].detach().cpu().numpy()
                         target = targets[j]
                         pred = preds[j]
-                        label = labels.numpy() #[1:]
 
                         # Reformat real image 
                         image = np.delete(image, 0, 0) # Delete NIR channel                        
                         image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
-                        
+
                         # Reformat results from prediction
                         R_pred,G_pred,B_pred = pixel_mapper(pred)
                         # Create 3D image
@@ -263,25 +261,11 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         # Prepare for printing format
                         pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
                         pred = np.clip(pred, 0, 255)  # Sanity check                   
-                        
-                        if 1 in target:
-                            print("Class 1 in target")
-                        if 2 in target:
-                            print("Class 2 in target")
-                        if 3 in target:
-                            print("Class 3 in target")
-                        if 4 in target:
-                            print("Class 4 in target")
-                        if 5 in target:
-                            print("Class 5 in target")
-                        if 6 in target:
-                            print("Class 6 in target")
-                        if 255 in target:
-                            print("255 in target why tho??")
-                        
-
                         # Reformat results from target
-                        target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
+                        R_pred,G_pred,B_pred = pixel_mapper(target)
+                        # Create 3D image
+                        formatted_target = np.array([R_pred,G_pred,B_pred])
+                        target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
                         # Save results from validation
                         Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
                         Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
@@ -289,6 +273,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         # Overlap images
                         fig = plt.figure()
                         plt.imshow(image)
+                        #plt.title("Printing overlay of target and image")
                         plt.axis('off')
                         plt.imshow(pred, alpha=0.35)
                         ax = plt.gca()
@@ -466,7 +451,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 1 == 0:
+            if (cur_itrs) % 10 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
