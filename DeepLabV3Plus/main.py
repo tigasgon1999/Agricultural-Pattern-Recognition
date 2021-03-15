@@ -186,6 +186,27 @@ def get_dataset(opts):
                              split='val', transform=val_transform)
     return train_dst, val_dst
 
+def pixel_mapper(pixel_map):
+    class_map = {
+    0 : (0, 0, 0),        # background (Black)
+    1 : (255, 255, 0),    # cloud_shadow (Yellow)
+    2 : (255, 0, 255),    # double_plant (Purple)
+    3 : (0, 255, 0),      # planter_skip (Green)
+    4 : (0, 0, 255),      # standing_water (Blue)
+    5 : (255, 255, 255),  # waterway (White)
+    6 : (0, 255, 255),    # weed_cluster (Cian)
+    }
+    # Get new RGB channels
+    R = pixel_map
+    G = pixel_map
+    B = pixel_map
+    for classe in class_map.keys():
+        R = np.where(R == classe, class_map[classe][0], R)
+        G = np.where(G == classe, class_map[classe][1], G)
+        B = np.where(B == classe, class_map[classe][2], B)
+
+    return R,G,B
+
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
@@ -236,25 +257,28 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
                         
                         # Reformat results from prediction
-                        class_map = {
-                        0 : (0, 0, 0),        # background
-                        1 : (255, 255, 0),    # cloud_shadow
-                        2 : (255, 0, 255),    # double_plant
-                        3 : (0, 255, 0),      # planter_skip
-                        4 : (0, 0, 255),      # standing_water
-                        5 : (255, 255, 255),  # waterway
-                        6 : (0, 255, 255),    # weed_cluster
-                        }
-
-                        for classe in class_map.keys():
-                            R_channel = np.where(pred == classe, class_map[classe][0], pred)
-                            G_channel = np.where(pred == classe, class_map[classe][1], pred)
-                            B_channel = np.where(pred == classe, class_map[classe][2], pred)
-
-                        formatted_pred = np.array([R_channel,G_channel,B_channel])
+                        R_pred,G_pred,B_pred = pixel_mapper(pred)
+                        # Create 3D image
+                        formatted_pred = np.array([R_pred,G_pred,B_pred])
+                        # Prepare for printing format
                         pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
                         pred = np.clip(pred, 0, 255)  # Sanity check                   
                         
+                        if 1 in target:
+                            print("Class 1 in target")
+                        if 2 in target:
+                            print("Class 2 in target")
+                        if 3 in target:
+                            print("Class 3 in target")
+                        if 4 in target:
+                            print("Class 4 in target")
+                        if 5 in target:
+                            print("Class 5 in target")
+                        if 6 in target:
+                            print("Class 6 in target")
+                        if 255 in target:
+                            print("255 in target why tho??")
+
                         # Reformat results from target
                         target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
                         # Save results from validation
