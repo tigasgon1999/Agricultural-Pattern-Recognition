@@ -5,7 +5,7 @@ import os
 import random
 import argparse
 import numpy as np
-np.set_printoptions(threshold=sys.maxsize)
+#np.set_printoptions(threshold=sys.maxsize)
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
@@ -436,7 +436,9 @@ def main():
             labels = labels.to(device, dtype=torch.long)
 
             optimizer.zero_grad()
+            print("Starting training...")
             outputs = model(images)
+            print("Trained...")
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -446,7 +448,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 10 == 0:
+            if (cur_itrs) % 1 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
