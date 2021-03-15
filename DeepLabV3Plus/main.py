@@ -186,7 +186,6 @@ def get_dataset(opts):
                              split='val', transform=val_transform)
     return train_dst, val_dst
 
-
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
@@ -226,46 +225,43 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                 for j in range(len(images)):
                     counter = i+j
                     if counter % image_interval == 0:
+                        # Extract predictions, labels and image
                         image = images[j].detach().cpu().numpy()
                         target = targets[j]
                         pred = preds[j]
                         label = labels.numpy() #[1:]
 
-                        is_all_zero = np.all((label == 4))
-
-                        if 1 in pred:
-                            print("Found class 1")
-                        if 2 in pred:
-                            print("Found class 2")
-                        if 3 in pred:
-                            print("Found class 3")
-                        if 4 in pred:
-                            print("Found class 4")
-                        if 5 in pred:
-                            print("Found class 5")
-                        if 6 in pred:
-                            print("Found class 6")
-                        if 7 in pred:
-                            print("Found class 7")
-                        if 8 in pred:
-                            print("Found class 8")
-
-                        # Visualize results from real image 
-                        image = np.delete(image, 0, 0)                         
+                        # Reformat real image 
+                        image = np.delete(image, 0, 0) # Delete NIR channel                        
                         image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
                         
-                        # Visualize results from prediction
-                        new_pred = np.array([pred,pred,pred])
-                        pred = denorm(pred).transpose(1, 2, 0).astype(np.uint8)
-                        pred = pred*255
-                        pred = np.clip(pred, 0, 255)                     
+                        # Reformat results from prediction
+                        class_map = {
+                        0 : (0, 0, 0),        # background
+                        1 : (255, 255, 0),    # cloud_shadow
+                        2 : (255, 0, 255),    # double_plant
+                        3 : (0, 255, 0),      # planter_skip
+                        4 : (0, 0, 255),      # standing_water
+                        5 : (255, 255, 255),  # waterway
+                        6 : (0, 255, 255),    # weed_cluster
+                        }
+
+                        for classe in class_map.keys():
+                            R_channel = np.where(pred == classe, class_map[classe][0], pred)
+                            G_channel = np.where(pred == classe, class_map[classe][1], pred)
+                            B_channel = np.where(pred == classe, class_map[classe][2], pred)
+
+                        formatted_pred = np.array([R_channel,G_channel,B_channel])
+                        pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
+                        pred = np.clip(pred, 0, 255)  # Sanity check                   
                         
-                        # Visualize results from target
+                        # Reformat results from target
                         target = denorm(target).transpose(1, 2, 0).astype(np.uint8)
+                        # Save results from validation
                         Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
                         Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
                         Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
-
+                        # Overlap images
                         fig = plt.figure()
                         plt.imshow(image)
                         plt.axis('off')
@@ -435,9 +431,7 @@ def main():
             labels = labels.to(device, dtype=torch.long)
 
             optimizer.zero_grad()
-            print("Starting training...")
             outputs = model(images)
-            print("Trained...")
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
