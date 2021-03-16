@@ -212,6 +212,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     ret_samples = []
     counter = 0
     image_interval = 100
+    progress_path = f'results/progress/os_{opts.output_stride}'
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
