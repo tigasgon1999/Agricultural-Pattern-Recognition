@@ -83,6 +83,7 @@ def get_argparser():
     parser.add_argument("--download", action='store_true', default=False,
                         help="download datasets")
     parser.add_argument("--resolution", type=int, default=512, choices=[128, 256, 512])
+    parser.add_argument("--extra_aug", action='store_true', default=False)
 
     # PASCAL VOC Options
     parser.add_argument("--year", type=str, default='2012',
@@ -312,6 +313,10 @@ def main():
         train_args.save_pred = False
         # output training configuration to a text file
         train_args.ckpt_path=os.path.abspath(os.curdir)
+        if opts.extra_aug:
+            train_args.extra_augment = True
+            train_args.classes_augment = [2, 3]
+
         train_dst, val_dst = train_args.get_dataset()
     else:
         train_dst, val_dst = get_dataset(opts)
