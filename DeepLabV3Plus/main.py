@@ -25,36 +25,6 @@ import matplotlib.pyplot as plt
 from config.configs_kf import *
 import pandas as pd
 
-prepare_gt(VAL_ROOT)
-prepare_gt(TRAIN_ROOT)
-
-train_args = agriculture_configs(net_name='MSCG-Rx50',
-                                 data='Agriculture',
-                                 bands_list=['NIR', 'RGB'],
-                                 kf=0, k_folder=0,
-                                 note='reproduce_ACW_loss2_adax'
-                                 )
-
-train_args.input_size = [512, 512]
-train_args.scale_rate = 1.  # 256./512.  # 448.0/512.0 #1.0/1.0
-train_args.val_size = [512, 512]
-train_args.node_size = (32, 32)
-train_args.train_batch = 10
-train_args.val_batch = 10
-
-train_args.lr = 1.5e-4 / np.sqrt(3)
-train_args.weight_decay = 2e-5
-
-train_args.lr_decay = 0.9
-train_args.max_iter = 1e8
-
-train_args.snapshot = ''
-
-train_args.print_freq = 1
-train_args.save_pred = False
-# output training configuration to a text file
-train_args.ckpt_path=os.path.abspath(os.curdir)
-
 
 def get_argparser():
     parser = argparse.ArgumentParser()
@@ -113,6 +83,7 @@ def get_argparser():
                         help="epoch interval for eval (default: 100)")
     parser.add_argument("--download", action='store_true', default=False,
                         help="download datasets")
+    parser.add_argument("--resolution", type=int, default=512, choices=[128, 256, 512])
 
     # PASCAL VOC Options
     parser.add_argument("--year", type=str, default='2012',
@@ -319,6 +290,31 @@ def main():
         opts.val_batch_size = 1
 
     if opts.dataset == 'agr':
+        prepare_gt(VAL_ROOT)
+        prepare_gt(TRAIN_ROOT)
+        
+        train_args = agriculture_configs(net_name='MSCG-Rx50',
+                                 data='Agriculture',
+                                 bands_list=['NIR', 'RGB'],
+                                 kf=0, k_folder=0,
+                                 note='reproduce_ACW_loss2_adax'
+                                 )
+        train_args.input_size = [opts.resolution, opts.resolution]
+        train_args.scale_rate = opts.resolution / 512 #1.  # 256./512.  # 448.0/512.0 #1.0/1.0
+        train_args.val_size = [opts.resolution, opts.resolution]
+        train_args.node_size = (32, 32)
+        # Note that this batch sizes are unused, we are using the ones from opts
+        #train_args.train_batch = 10
+        #train_args.val_batch = 10
+        train_args.lr = 1.5e-4 / np.sqrt(3)
+        train_args.weight_decay = 2e-5
+        train_args.lr_decay = 0.9
+        train_args.max_iter = 1e8
+        train_args.snapshot = ''
+        train_args.print_freq = 1
+        train_args.save_pred = False
+        # output training configuration to a text file
+        train_args.ckpt_path=os.path.abspath(os.curdir)
         train_dst, val_dst = train_args.get_dataset()
     else:
         train_dst, val_dst = get_dataset(opts)
