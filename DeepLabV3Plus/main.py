@@ -192,12 +192,14 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     if opts.save_val_results:
         os_ = opts.output_stride
         loss_ = opts.loss_type
-        create_dir('results')
-        create_dir(f'results/{loss_}')
-        create_dir(f'results/{loss_}/images')
-        create_dir(f'results/{loss_}/images/os_{os_}')
-        create_dir(f'results/{loss_}/progress')
-        create_dir(f'results/{loss_}/progress/os_{os_}')
+        model_ = opts.model
+        create_dir('results_aug')
+        create_dir(f'results_aug/{model_}')
+        create_dir(f'results_aug/{model_}/{loss_}')
+        create_dir(f'results_aug/{model_}/{loss_}/images')
+        create_dir(f'results_aug/{model_}/{loss_}/images/os_{os_}')
+        create_dir(f'results_aug/{model_}/{loss_}/progress')
+        create_dir(f'results_aug/{model_}/{loss_}/progress/os_{os_}')
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
@@ -242,9 +244,9 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         formatted_target = np.array([R_pred,G_pred,B_pred])
                         target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
                         # Save results from validation
-                        Image.fromarray(image).save(f'results/{loss_}/images/os_{os_}/{img_id}_image.png')
-                        Image.fromarray(target).save(f'results/{loss_}/images/os_{os_}/{img_id}_target.png')
-                        Image.fromarray(pred).save(f'results/{loss_}/images/os_{os_}/{img_id}_pred.png')
+                        Image.fromarray(image).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_image.png')
+                        Image.fromarray(target).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_target.png')
+                        Image.fromarray(pred).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_pred.png')
                         # Overlap images
                         fig = plt.figure()
                         plt.imshow(image)
@@ -254,7 +256,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         ax = plt.gca()
                         ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                         ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        plt.savefig(f'results/{loss_}/images/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                        plt.savefig(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
                         #plt.show()
                         plt.close()
                         img_id += 1
@@ -432,6 +434,7 @@ def main():
     val_epochs = []
     os_ = opts.output_stride
     loss_ = opts.loss_type
+    model_ = opts.model
 
     interval_loss = 0
     while True: #cur_itrs < opts.total_itrs:
@@ -488,7 +491,7 @@ def main():
                     overall_accuracies.append(val_score['Overall Acc'])
                     iterations_val.append(cur_itrs)
                     val_epochs.append(cur_epochs)
-                    np.save(f"./results/{loss_}/progress/os_{os_}/confusion_matrix.npy", val_score['Confusion matrix'])
+                    np.save(f"./results_aug/{model_}/{loss_}/progress/os_{os_}/confusion_matrix.npy", val_score['Confusion matrix'])
 
                 if val_score['Mean IoU'] > best_score:  # save best model
                     best_score = val_score['Mean IoU']
@@ -532,8 +535,9 @@ def main():
                 output_df = pd.DataFrame.from_dict(output_dict)
                 train_df = pd.DataFrame.from_dict(train_dict)
 
-                output_df.to_csv(f"./results/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
-                train_df.to_csv(f"results/{loss_}/progress/os_{os_}/train_results.csv", index = False)
+                output_df.to_csv(f"results/{model_}/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
+                train_df.to_csv(f"results/{model_}/{loss_}/progress/os_{os_}/train_results.csv", index = False)
+                
                 return
 
         
