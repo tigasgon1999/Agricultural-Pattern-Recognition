@@ -11,7 +11,7 @@ np.set_printoptions(threshold=sys.maxsize)
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
 from utils import ext_transforms as et
-from utils.loss import ACW_loss
+from utils.loss import ACW_loss, ComposedLossWithLogits
 from metrics import StreamSegMetrics
 
 import torch
@@ -70,7 +70,7 @@ def get_argparser():
     parser.add_argument("--continue_training", action='store_true', default=False)
 
     parser.add_argument("--loss_type", type=str, default='cross_entropy',
-                        choices=['cross_entropy', 'focal_loss', 'acw_loss'], help="loss type (default: False)")
+                        choices=['cross_entropy', 'focal_loss', 'acw_loss', 'comp_loss'], help="loss type (default: False)")
     parser.add_argument("--gpu_id", type=str, default='0',
                         help="GPU ID")
     parser.add_argument("--weight_decay", type=float, default=1e-4,
@@ -372,6 +372,13 @@ def main():
         criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean')
     elif opts.loss_type == 'acw_loss':
         criterion = ACW_loss()
+    elif opts.loss_type == 'comp_loss':
+        # LOSS:
+        #   bce: 1.0
+        #   dice: 1.0
+        #   lovasz: 1.0
+        comp_loss_dict = {'bce': 1.0, 'dice': 1.0, 'lovasz': 1.0}
+        criterion = ComposedLossWithLogits(comp_loss_dict)
 
     def save_ckpt(path):
         """ save current model
@@ -463,7 +470,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 10 == 0:
+            if (cur_itrs) % 1 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
