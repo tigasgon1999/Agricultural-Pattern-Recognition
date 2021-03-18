@@ -228,8 +228,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     counter_4 = 0
     counter_5 = 0
     counter_6 = 0
-    image_interval = 100
-    progress_path = f'results/progress/os_{opts.output_stride}'
+    image_interval = 25
     if opts.save_val_results:
         os_ = opts.output_stride
         loss_ = opts.loss_type
@@ -238,8 +237,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
         create_dir(f'results_aug/{model_}')
         create_dir(f'results_aug/{model_}/{loss_}')
         for class_ in range(0,7):
-            create_dir(f'results_aug/{model_}/{loss_}/{class_}/images')
-            create_dir(f'results_aug/{model_}/{loss_}/{class_}/images/os_{os_}')
+            create_dir(f'results_aug/{model_}/{loss_}/images/{class_}')
+            create_dir(f'results_aug/{model_}/{loss_}/images/{class_}/os_{os_}')
 
         create_dir(f'results_aug/{model_}/{loss_}/progress')
         create_dir(f'results_aug/{model_}/{loss_}/progress/os_{os_}')
