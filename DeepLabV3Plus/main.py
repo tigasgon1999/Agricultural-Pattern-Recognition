@@ -85,6 +85,7 @@ def get_argparser():
                         help="download datasets")
     parser.add_argument("--resolution", type=int, default=512, choices=[128, 256, 512])
     parser.add_argument("--extra_aug", action='store_true', default=False)
+    parser.add_argument("--oversample", action='store_true', default=False)
 
     # PASCAL VOC Options
     parser.add_argument("--year", type=str, default='2012',
@@ -372,9 +373,24 @@ def main():
         train_dst, val_dst = train_args.get_dataset()
     else:
         train_dst, val_dst = get_dataset(opts)
-    
-    train_loader = data.DataLoader(
-        train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
+
+    if opts.oversample:
+        # Generate sample weights
+        classes_ratio = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
+        sample_weights = np.zeros(len(train_dst))
+        index = 0
+        for img, mask in train_dst:
+            mask_array = mask.numpy()
+            sample_weights[index] = 0
+            for class_label in range(len(classes_ratio)):
+                sample_weights[index] += np.sum(mask_array == (class_label + 1))*classes_ratio[class_label]
+            index += 1
+        sample_weights = sample_weights / np.sum(sample_weights)
+        sampler = data.WeightedRandomSampler(sample_weights, len(sample_weights))
+        train_loader = data.DataLoader(train_dst, batch_size=opts.batch_size, sampler = sampler, num_workers=2)
+    else:
+        train_loader = data.DataLoader(train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
+        
     val_loader = data.DataLoader(
         val_dst, batch_size=opts.val_batch_size, shuffle=True, num_workers=2)
     print("Dataset: %s, Train set: %d, Val set: %d" %
