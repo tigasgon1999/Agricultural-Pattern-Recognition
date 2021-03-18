@@ -183,11 +183,56 @@ def create_dir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+def output_data(image, pred, target, model_, loss_, class_):
+    # Extract predictions, labels and image
+    image = images[j].detach().cpu().numpy()
+    target = targets[j]
+    pred = preds[j]
+
+    # Reformat real image 
+    image = np.delete(image, 0, 0) # Delete NIR channel                        
+    image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
+
+    # Reformat results from prediction
+    R_pred,G_pred,B_pred = pixel_mapper(pred)
+    # Create 3D image
+    formatted_pred = np.array([R_pred,G_pred,B_pred])
+    # Prepare for printing format
+    pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
+    pred = np.clip(pred, 0, 255)  # Sanity check                   
+    # Reformat results from target
+    R_pred,G_pred,B_pred = pixel_mapper(target)
+    # Create 3D image
+    formatted_target = np.array([R_pred,G_pred,B_pred])
+    target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
+    # Save results from validation
+    Image.fromarray(image).save(f'results_aug/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_image.png')
+    Image.fromarray(target).save(f'results_aug/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_target.png')
+    Image.fromarray(pred).save(f'results_aug/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_pred.png')
+    # Overlap images
+    fig = plt.figure()
+    plt.imshow(image)
+    #plt.title("Printing overlay of target and image")
+    plt.axis('off')
+    plt.imshow(pred, alpha=0.35)
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+    ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+    plt.savefig(f'results_aug/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+    #plt.show()
+    plt.close()
+
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
     ret_samples = []
-    counter = 0
+    counter_0 = 0
+    counter_1 = 0
+    counter_2 = 0
+    counter_3 = 0
+    counter_4 = 0
+    counter_5 = 0
+    counter_6 = 0
     image_interval = 100
     progress_path = f'results/progress/os_{opts.output_stride}'
     if opts.save_val_results:
@@ -197,8 +242,10 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
         create_dir('results_aug')
         create_dir(f'results_aug/{model_}')
         create_dir(f'results_aug/{model_}/{loss_}')
-        create_dir(f'results_aug/{model_}/{loss_}/images')
-        create_dir(f'results_aug/{model_}/{loss_}/images/os_{os_}')
+        for class_ in range(0,7):
+            create_dir(f'results_aug/{model_}/{loss_}/{class_}/images')
+            create_dir(f'results_aug/{model_}/{loss_}/{class_}/images/os_{os_}')
+
         create_dir(f'results_aug/{model_}/{loss_}/progress')
         create_dir(f'results_aug/{model_}/{loss_}/progress/os_{os_}')
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
@@ -221,47 +268,48 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
             if opts.save_val_results:
                 for j in range(len(images)):
-                    counter = i+j
-                    if counter % image_interval == 0:
-                        # Extract predictions, labels and image
-                        image = images[j].detach().cpu().numpy()
-                        target = targets[j]
-                        pred = preds[j]
+                    if 0 in target:
+                        counter_0 += 1
+                        if counter_0 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 0)
+                            img_id += 1
+                    
+                    if 1 in target:
+                        counter_1 += 1
+                        if counter_1 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 1)
+                            img_id += 1
 
-                        # Reformat real image 
-                        image = np.delete(image, 0, 0) # Delete NIR channel                        
-                        image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
+                    if 2 in target:
+                        counter_2 += 1
+                        if counter_2 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 2)
+                            img_id += 1  
 
-                        # Reformat results from prediction
-                        R_pred,G_pred,B_pred = pixel_mapper(pred)
-                        # Create 3D image
-                        formatted_pred = np.array([R_pred,G_pred,B_pred])
-                        # Prepare for printing format
-                        pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
-                        pred = np.clip(pred, 0, 255)  # Sanity check                   
-                        # Reformat results from target
-                        R_pred,G_pred,B_pred = pixel_mapper(target)
-                        # Create 3D image
-                        formatted_target = np.array([R_pred,G_pred,B_pred])
-                        target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
-                        # Save results from validation
-                        Image.fromarray(image).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_image.png')
-                        Image.fromarray(target).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_target.png')
-                        Image.fromarray(pred).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_pred.png')
-                        # Overlap images
-                        fig = plt.figure()
-                        plt.imshow(image)
-                        #plt.title("Printing overlay of target and image")
-                        plt.axis('off')
-                        plt.imshow(pred, alpha=0.35)
-                        ax = plt.gca()
-                        ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        plt.savefig(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
-                        #plt.show()
-                        plt.close()
-                        img_id += 1
-            
+                    if 3 in target:
+                        counter_3 += 1
+                        if counter_3 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 3)
+                            img_id += 1
+
+                    if 4 in target:
+                        counter_4 += 1
+                        if counter_4 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 4)
+                            img_id += 1
+
+                    if 5 in target:
+                        counter_5 += 1
+                        if counter_5 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 5)
+                            img_id += 1
+
+                    if 6 in target:
+                        counter_6 += 1
+                        if counter_6 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 6)
+                            img_id += 1
+
         score = metrics.get_results()
     return score, ret_samples
 
