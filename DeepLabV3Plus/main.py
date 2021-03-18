@@ -183,7 +183,7 @@ def create_dir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-def output_data(image, pred, target, model_, loss_, class_):
+def output_data(image, pred, target, model_, loss_, class_, img_id):
     # Extract predictions, labels and image
     image = images[j].detach().cpu().numpy()
     target = targets[j]
@@ -271,43 +271,43 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     if 0 in target:
                         counter_0 += 1
                         if counter_0 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 0)
+                            output_data(image, pred, target, model_, loss_, 0, img_id)
                             img_id += 1
                     
                     if 1 in target:
                         counter_1 += 1
                         if counter_1 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 1)
+                            output_data(image, pred, target, model_, loss_, 1, img_id)
                             img_id += 1
 
                     if 2 in target:
                         counter_2 += 1
                         if counter_2 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 2)
+                            output_data(image, pred, target, model_, loss_, 2, img_id)
                             img_id += 1  
 
                     if 3 in target:
                         counter_3 += 1
                         if counter_3 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 3)
+                            output_data(image, pred, target, model_, loss_, 3, img_id)
                             img_id += 1
 
                     if 4 in target:
                         counter_4 += 1
                         if counter_4 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 4)
+                            output_data(image, pred, target, model_, loss_, 4, img_id)
                             img_id += 1
 
                     if 5 in target:
                         counter_5 += 1
                         if counter_5 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 5)
+                            output_data(image, pred, target, model_, loss_, 5, img_id)
                             img_id += 1
 
                     if 6 in target:
                         counter_6 += 1
                         if counter_6 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 6)
+                            output_data(image, pred, target, model_, loss_, 6, img_id)
                             img_id += 1
 
         score = metrics.get_results()
