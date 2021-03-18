@@ -540,8 +540,8 @@ def main():
                 output_df = pd.DataFrame.from_dict(output_dict)
                 train_df = pd.DataFrame.from_dict(train_dict)
 
-                output_df.to_csv(f"results/{model_}/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
-                train_df.to_csv(f"results/{model_}/{loss_}/progress/os_{os_}/train_results.csv", index = False)
+                output_df.to_csv(f"results_aug/{model_}/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
+                train_df.to_csv(f"results_aug/{model_}/{loss_}/progress/os_{os_}/train_results.csv", index = False)
                 
                 return
 
