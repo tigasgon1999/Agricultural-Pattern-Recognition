@@ -184,11 +184,6 @@ def create_dir(directory):
         os.makedirs(directory)
 
 def output_data(image, pred, target, model_, loss_, class_, img_id):
-    # Extract predictions, labels and image
-    image = images[j].detach().cpu().numpy()
-    target = targets[j]
-    pred = preds[j]
-
     # Reformat real image 
     image = np.delete(image, 0, 0) # Delete NIR channel                        
     image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
@@ -268,6 +263,10 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
             if opts.save_val_results:
                 for j in range(len(images)):
+                    # Extract predictions, labels and image
+                    image = images[j].detach().cpu().numpy()
+                    target = targets[j]
+                    pred = preds[j]
                     if 0 in target:
                         counter_0 += 1
                         if counter_0 % image_interval == 0:
