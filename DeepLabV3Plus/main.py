@@ -11,6 +11,7 @@ np.set_printoptions(threshold=sys.maxsize)
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
 from utils import ext_transforms as et
+from utils.loss import ACW_loss
 from metrics import StreamSegMetrics
 
 import torch
@@ -69,7 +70,7 @@ def get_argparser():
     parser.add_argument("--continue_training", action='store_true', default=False)
 
     parser.add_argument("--loss_type", type=str, default='cross_entropy',
-                        choices=['cross_entropy', 'focal_loss'], help="loss type (default: False)")
+                        choices=['cross_entropy', 'focal_loss', 'acw_loss'], help="loss type (default: False)")
     parser.add_argument("--gpu_id", type=str, default='0',
                         help="GPU ID")
     parser.add_argument("--weight_decay", type=float, default=1e-4,
@@ -83,6 +84,7 @@ def get_argparser():
     parser.add_argument("--download", action='store_true', default=False,
                         help="download datasets")
     parser.add_argument("--resolution", type=int, default=512, choices=[128, 256, 512])
+    parser.add_argument("--extra_aug", action='store_true', default=False)
 
     # PASCAL VOC Options
     parser.add_argument("--year", type=str, default='2012',
@@ -177,23 +179,28 @@ def pixel_mapper(pixel_map):
 
     return R,G,B
 
+def create_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
     ret_samples = []
     counter = 0
     image_interval = 100
+    progress_path = f'results/progress/os_{opts.output_stride}'
     if opts.save_val_results:
-        if not os.path.exists('results'):
-            os.mkdir('results')
-        if not os.path.exists('results/images'):
-            os.mkdir('results/images')
-        if not os.path.exists(f'results/images/os_{opts.output_stride}'):
-            os.mkdir(f'results/images/os_{opts.output_stride}')
-        if not os.path.exists('results/progress'):
-            os.mkdir('results/progress')
-        if not os.path.exists(f'results/progress/os_{opts.output_stride}'):
-            os.mkdir(f'results/progress/os_{opts.output_stride}')
+        os_ = opts.output_stride
+        loss_ = opts.loss_type
+        model_ = opts.model
+        create_dir('results_aug')
+        create_dir(f'results_aug/{model_}')
+        create_dir(f'results_aug/{model_}/{loss_}')
+        create_dir(f'results_aug/{model_}/{loss_}/images')
+        create_dir(f'results_aug/{model_}/{loss_}/images/os_{os_}')
+        create_dir(f'results_aug/{model_}/{loss_}/progress')
+        create_dir(f'results_aug/{model_}/{loss_}/progress/os_{os_}')
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
@@ -232,16 +239,15 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         # Prepare for printing format
                         pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
                         pred = np.clip(pred, 0, 255)  # Sanity check                   
-
                         # Reformat results from target
                         R_pred,G_pred,B_pred = pixel_mapper(target)
                         # Create 3D image
                         formatted_target = np.array([R_pred,G_pred,B_pred])
                         target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
                         # Save results from validation
-                        Image.fromarray(image).save(f'results/images/os_{opts.output_stride}/{img_id}_image.png')
-                        Image.fromarray(target).save(f'results/images/os_{opts.output_stride}/{img_id}_target.png')
-                        Image.fromarray(pred).save(f'results/images/os_{opts.output_stride}/{img_id}_pred.png')
+                        Image.fromarray(image).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_image.png')
+                        Image.fromarray(target).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_target.png')
+                        Image.fromarray(pred).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_pred.png')
                         # Overlap images
                         fig = plt.figure()
                         plt.imshow(image)
@@ -251,7 +257,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                         ax = plt.gca()
                         ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
                         ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        plt.savefig(f'results/images/os_{opts.output_stride}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+                        plt.savefig(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
                         #plt.show()
                         plt.close()
                         img_id += 1
@@ -312,6 +318,10 @@ def main():
         train_args.save_pred = False
         # output training configuration to a text file
         train_args.ckpt_path=os.path.abspath(os.curdir)
+        if opts.extra_aug:
+            train_args.extra_augment = True
+            train_args.classes_augment = [2, 3]
+
         train_dst, val_dst = train_args.get_dataset()
     else:
         train_dst, val_dst = get_dataset(opts)
@@ -360,6 +370,8 @@ def main():
         criterion = utils.FocalLoss(ignore_index=255, size_average=True)
     elif opts.loss_type == 'cross_entropy':
         criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean')
+    elif opts.loss_type == 'acw_loss':
+        criterion = ACW_loss()
 
     def save_ckpt(path):
         """ save current model
@@ -425,6 +437,9 @@ def main():
     overall_accuracies = []
     train_epochs = []
     val_epochs = []
+    os_ = opts.output_stride
+    loss_ = opts.loss_type
+    model_ = opts.model
 
     interval_loss = 0
     while True: #cur_itrs < opts.total_itrs:
@@ -481,7 +496,7 @@ def main():
                     overall_accuracies.append(val_score['Overall Acc'])
                     iterations_val.append(cur_itrs)
                     val_epochs.append(cur_epochs)
-                    np.save(f"./results/progress/os_{opts.output_stride}/confusion_matrix.npy", val_score['Confusion matrix'])
+                    np.save(f"./results_aug/{model_}/{loss_}/progress/os_{os_}/confusion_matrix.npy", val_score['Confusion matrix'])
 
                 if val_score['Mean IoU'] > best_score:  # save best model
                     best_score = val_score['Mean IoU']
@@ -525,8 +540,9 @@ def main():
                 output_df = pd.DataFrame.from_dict(output_dict)
                 train_df = pd.DataFrame.from_dict(train_dict)
 
-                output_df.to_csv(f"./results/progress/os_{opts.output_stride}/eval_results.csv", index = False)
-                train_df.to_csv(f"./results/progress/os_{opts.output_stride}/train_results.csv", index = False)
+                output_df.to_csv(f"results_aug/{model_}/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
+                train_df.to_csv(f"results_aug/{model_}/{loss_}/progress/os_{os_}/train_results.csv", index = False)
+                
                 return
 
         

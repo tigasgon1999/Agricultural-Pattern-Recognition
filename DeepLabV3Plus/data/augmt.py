@@ -32,6 +32,7 @@ from albumentations import (
     Blur,
     MedianBlur,
     ChannelShuffle,
+    RGBShift
 )
 
 

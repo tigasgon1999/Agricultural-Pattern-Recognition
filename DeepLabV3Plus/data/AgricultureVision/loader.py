@@ -12,7 +12,8 @@ cv2.ocl.setUseOpenCL(False)
 
 class AlgricultureDataset(Dataset):
     def __init__(self, mode='train', file_lists=None, windSize=(256, 256),
-                 num_samples=10000, pre_norm=False, scale=1.0 / 1.0):
+                 num_samples=10000, pre_norm=False, scale=1.0 / 1.0, 
+                 extra_augment = False, classes_augment = None):
         assert mode in ['train', 'val', 'test']
         self.mode = mode
         self.norm = pre_norm
@@ -22,6 +23,8 @@ class AlgricultureDataset(Dataset):
         self.all_ids = file_lists['all_files']
         self.image_files = file_lists[IMG]  # image_files = [[bands1, bands2,..], ...]
         self.mask_files = file_lists[GT]    # mask_files = [gt1, gt2, ...]
+        self.extra_augment = extra_augment
+        self.classes_augment = classes_augment
 
     def __len__(self):
         return len(self.all_ids)
@@ -57,7 +60,8 @@ class AlgricultureDataset(Dataset):
                                          size=self.winsize, limits=self.winsize)
 
         if self.mode == 'train':
-            image_p, label_p = self.train_augmentation(image, label)
+            image_p, label_p = self.train_augmentation(image, label, self.extra_augment,
+            self.classes_augment)
         elif self.mode == 'val':
             image_p, label_p = self.val_augmentation(image, label)
 
@@ -72,7 +76,9 @@ class AlgricultureDataset(Dataset):
         return image_p, label_p
 
     @classmethod
-    def train_augmentation(cls, img, mask):
+    def train_augmentation(cls, img, mask, extra_augment = False, classes_augment = None):
+        mask_width = mask.shape[0]
+        mask_height = mask.shape[1]
         aug = Compose([
             VerticalFlip(p=0.5),
             HorizontalFlip(p=0.5),
@@ -86,6 +92,25 @@ class AlgricultureDataset(Dataset):
         ])
 
         auged = aug(image=img, mask=mask)
+
+        if extra_augment:
+            extra_aug = Compose([
+                VerticalFlip(p=0.5),
+                HorizontalFlip(p=0.5),
+                RandomRotate90(p=0.5),
+                # MedianBlur(p=0.2),
+                # # Transpose(p=0.5),
+                RandomSizedCrop(min_max_height=(int(0.25*mask_height), int(0.75*mask_height)),
+                height=mask_height, width=mask_width, p=1),
+                ShiftScaleRotate(p=1, rotate_limit=45, scale_limit=0.1),
+                RGBShift(p = 1),
+                #HueSaturationValue(p = 1),
+                ChannelShuffle(p=0.25),
+                PadIfNeeded(min_height=128, min_width=128, p=1)
+            ])
+            for class_label in classes_augment:
+                if class_label in mask:
+                    auged = extra_aug(image=img, mask=mask)
         return auged['image'], auged['mask']
 
     @classmethod
