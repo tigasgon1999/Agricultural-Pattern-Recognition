@@ -202,9 +202,9 @@ def output_data(image, pred, target, model_, loss_, class_, img_id, os_):
     formatted_target = np.array([R_pred,G_pred,B_pred])
     target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
     # Save results from validation
-    Image.fromarray(image).save(f'results/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_image.png')
-    Image.fromarray(target).save(f'results/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_target.png')
-    Image.fromarray(pred).save(f'results/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_pred.png')
+    Image.fromarray(image).save(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_image.png')
+    Image.fromarray(target).save(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_target.png')
+    Image.fromarray(pred).save(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_pred.png')
     # Overlap images
     fig = plt.figure()
     plt.imshow(image)
@@ -214,7 +214,7 @@ def output_data(image, pred, target, model_, loss_, class_, img_id, os_):
     ax = plt.gca()
     ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
     ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-    plt.savefig(f'results/{model_}/{loss_}/images/{class_}/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
     #plt.show()
     plt.close()
 
@@ -238,8 +238,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
         create_dir(f'results/{model_}')
         create_dir(f'results/{model_}/{loss_}')
         for class_ in range(0,7):
-            create_dir(f'results/{model_}/{loss_}/images/{class_}')
-            create_dir(f'results/{model_}/{loss_}/images/{class_}/os_{os_}')
+            create_dir(f'results/{model_}/{loss_}/images/os_{os_}')
+            create_dir(f'results/{model_}/{loss_}/images/os_{os_}/{class_}')
 
         create_dir(f'results/{model_}/{loss_}/progress')
         create_dir(f'results/{model_}/{loss_}/progress/os_{os_}')
