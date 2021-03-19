@@ -6,3 +6,6 @@ checkpoints
 __pycache__
 checkpoints_bak
 cityscapes
+downsample_loss_results
+full_set_results
+results_aug
