@@ -229,7 +229,7 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     counter_4 = 0
     counter_5 = 0
     counter_6 = 0
-    image_interval = 25
+    image_interval = 50
     if opts.save_val_results:
         os_ = opts.output_stride
         loss_ = opts.loss_type
