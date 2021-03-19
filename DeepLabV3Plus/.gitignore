@@ -6,6 +6,11 @@ checkpoints
 __pycache__
 checkpoints_bak
 cityscapes
-downsample_loss_results
-full_set_results
-results_aug
+downsample_loss_results/acw_loss/images/os_32/*.png
+downsample_loss_results/cross_entropy/images/os_32/*.png
+downsample_loss_results/focal_loss/images/os_32/*.png
+full_set_results/cross_entropy/images/os_8/*.png
+full_set_results/cross_entropy/images/os_16/*.png
+full_set_results/cross_entropy/images/os_32/**/*.png
+results_aug/deeplabv3plus_resnet50/acw_loss/images/os_32/*.png
+results_aug/deeplabv3plus_resnet50/cross_entropy/images/os_32/*.png
