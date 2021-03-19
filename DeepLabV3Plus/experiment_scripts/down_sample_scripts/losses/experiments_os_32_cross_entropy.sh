@@ -1,1 +1,1 @@
-python main.py --model deeplabv3plus_resnet50 --gpu_id 0 --year 2012_aug  --lr 0.01 --crop_size 512 --batch_size 8 --output_stride 32 --dataset 'agr' --num_classes 7 --save_val_results --val_interval 100 --total_itrs 8100 --resolution 256 --oversample
+python main.py --model deeplabv3plus_resnet50 --gpu_id 0 --year 2012_aug  --lr 0.01 --crop_size 512 --batch_size 8 --output_stride 32 --dataset 'agr' --num_classes 7 --save_val_results --val_interval 100 --total_itrs 8100 --resolution 256
