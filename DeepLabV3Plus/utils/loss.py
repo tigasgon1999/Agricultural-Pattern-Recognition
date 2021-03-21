@@ -1,7 +1,11 @@
+import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 import torch 
+from catalyst.contrib.nn import \
+    DiceLoss, IoULoss, LovaszLossMultiLabel, FocalLossBinary
 
+# Focal Loss
 class FocalLoss(nn.Module):
     def __init__(self, alpha=1, gamma=0, size_average=True, ignore_index=255):
         super(FocalLoss, self).__init__()
@@ -20,6 +24,7 @@ class FocalLoss(nn.Module):
         else:
             return focal_loss.sum()
 
+# ACW Loss
 class ACW_loss(nn.Module):
     def __init__(self,  ini_weight=0, ini_iteration=0, eps=1e-5, ignore_index=255):
         super(ACW_loss, self).__init__()
@@ -92,3 +97,51 @@ class ACW_loss(nn.Module):
         else:
             one_hot_label.scatter_(1, target.unsqueeze(1), 1)
             return one_hot_label, None
+
+# Composed Loss
+str2Loss = {
+    "bce": nn.BCEWithLogitsLoss,
+    "dice": DiceLoss,
+    "iou": IoULoss,
+    "lovasz": LovaszLossMultiLabel,
+    "focal" : FocalLossBinary
+}
+
+class ComposedLossWithLogits(nn.Module):
+
+    def __init__(self, names_and_weights):
+        super().__init__()
+
+        assert type(names_and_weights) in (dict, list)
+
+        if isinstance(names_and_weights, dict):
+            names_and_weights = names_and_weights.items()
+
+        self.names = []
+        self.loss_fns = []
+        weights = []
+
+        for name, weight in names_and_weights:
+            if weight == 0:
+                continue
+            self.names.append(name)
+            self.loss_fns.append(str2Loss[name]())
+            weights.append(weight)
+
+        self.loss_fns = nn.ModuleList(self.loss_fns)
+
+        self.register_buffer('weights', torch.Tensor(weights))
+        self.weights /= self.weights.sum()
+
+    def forward(self, logit, target):
+        losses = torch.empty(7)
+        for c in range(7):
+            c_loss = torch.stack([loss_fn(logit[:, c, :, :], target.float())
+                                    for loss_fn in self.loss_fns])
+            c_sumed_loss = (torch.Tensor(c_loss) * self.weights).sum()
+            losses[c] = c_sumed_loss
+        loss = torch.Tensor(losses).mean()
+
+
+        return loss#sumed_loss, losses
+
