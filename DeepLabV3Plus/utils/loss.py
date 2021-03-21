@@ -144,3 +144,4 @@ class ComposedLossWithLogits(nn.Module):
 
 
         return loss#sumed_loss, losses
+

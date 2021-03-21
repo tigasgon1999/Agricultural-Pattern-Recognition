@@ -12,6 +12,7 @@ from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
 from utils import ext_transforms as et
 from utils.loss import ACW_loss, ComposedLossWithLogits
+import utils.lovasz_losses as L
 from metrics import StreamSegMetrics
 
 import torch
@@ -70,7 +71,8 @@ def get_argparser():
     parser.add_argument("--continue_training", action='store_true', default=False)
 
     parser.add_argument("--loss_type", type=str, default='cross_entropy',
-                        choices=['cross_entropy', 'focal_loss', 'acw_loss', 'comp_loss'], help="loss type (default: False)")
+                        choices=['cross_entropy', 'focal_loss', 'acw_loss', 
+                                 'comp_loss', 'lovasz_loss'], help="loss type (default: False)")
     parser.add_argument("--gpu_id", type=str, default='0',
                         help="GPU ID")
     parser.add_argument("--weight_decay", type=float, default=1e-4,
@@ -443,6 +445,7 @@ def main():
         comp_loss_dict = {'bce': 1.0, 'dice': 1.0, 'lovasz': 1.0}
         criterion = ComposedLossWithLogits(comp_loss_dict)
 
+
     def save_ckpt(path):
         """ save current model
         """
@@ -524,7 +527,10 @@ def main():
 
             optimizer.zero_grad()
             outputs = model(images)
-            loss = criterion(outputs, labels)
+            if opts.loss_type != 'lovasz_loss':
+                loss = criterion(outputs, labels)
+            else:
+                loss = L.lovasz_softmax(outputs, labels, ignore=255)
             loss.backward()
             optimizer.step()
 
