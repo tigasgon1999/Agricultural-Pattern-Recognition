@@ -12,6 +12,7 @@ downsample_loss_results/focal_loss/images/os_32/*.png
 full_set_results/cross_entropy/images/os_8/*.png
 full_set_results/cross_entropy/images/os_16/*.png
 full_set_results/cross_entropy/images/os_32/**/*.png
-results_aug/deeplabv3plus_resnet50/acw_loss/images/**/*.png
-results_aug/deeplabv3plus_resnet50/cross_entropy/images/**/*.png
-results_aug/deeplabv3plus_resnet50/focal_loss/images/**/*.png
+results_aug/aug_1/deeplabv3plus_resnet50/acw_loss/images/**/*.png
+results_aug/aug_2/deeplabv3plus_resnet50/acw_loss/images/**/*.png
+results_aug/aug_1/deeplabv3plus_resnet50/cross_entropy/images/**/*.png
+results_aug/aug_1/deeplabv3plus_resnet50/focal_loss/images/**/*.png
