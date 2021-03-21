@@ -85,6 +85,7 @@ def get_argparser():
                         help="download datasets")
     parser.add_argument("--resolution", type=int, default=512, choices=[128, 256, 512])
     parser.add_argument("--extra_aug", action='store_true', default=False)
+    parser.add_argument("--oversample", action='store_true', default=False)
 
     # PASCAL VOC Options
     parser.add_argument("--year", type=str, default='2012',
@@ -183,24 +184,65 @@ def create_dir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+def output_data(image, pred, target, model_, loss_, class_, img_id, os_):
+    # Reformat real image 
+    image = np.delete(image, 0, 0) # Delete NIR channel                        
+    image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
+
+    # Reformat results from prediction
+    R_pred,G_pred,B_pred = pixel_mapper(pred)
+    # Create 3D image
+    formatted_pred = np.array([R_pred,G_pred,B_pred])
+    # Prepare for printing format
+    pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
+    pred = np.clip(pred, 0, 255)  # Sanity check                   
+    # Reformat results from target
+    R_pred,G_pred,B_pred = pixel_mapper(target)
+    # Create 3D image
+    formatted_target = np.array([R_pred,G_pred,B_pred])
+    target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
+    # Save results from validation
+    Image.fromarray(image).save(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_image.png')
+    Image.fromarray(target).save(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_target.png')
+    Image.fromarray(pred).save(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_pred.png')
+    # Overlap images
+    fig = plt.figure()
+    plt.imshow(image)
+    #plt.title("Printing overlay of target and image")
+    plt.axis('off')
+    plt.imshow(pred, alpha=0.35)
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+    ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+    plt.savefig(f'results/{model_}/{loss_}/images/os_{os_}/{class_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
+    #plt.show()
+    plt.close()
+
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
     metrics.reset()
     ret_samples = []
-    counter = 0
-    image_interval = 100
-    progress_path = f'results/progress/os_{opts.output_stride}'
+    counter_0 = 0
+    counter_1 = 0
+    counter_2 = 0
+    counter_3 = 0
+    counter_4 = 0
+    counter_5 = 0
+    counter_6 = 0
+    image_interval = 50
     if opts.save_val_results:
         os_ = opts.output_stride
         loss_ = opts.loss_type
         model_ = opts.model
-        create_dir('results_aug')
-        create_dir(f'results_aug/{model_}')
-        create_dir(f'results_aug/{model_}/{loss_}')
-        create_dir(f'results_aug/{model_}/{loss_}/images')
-        create_dir(f'results_aug/{model_}/{loss_}/images/os_{os_}')
-        create_dir(f'results_aug/{model_}/{loss_}/progress')
-        create_dir(f'results_aug/{model_}/{loss_}/progress/os_{os_}')
+        create_dir('results')
+        create_dir(f'results/{model_}')
+        create_dir(f'results/{model_}/{loss_}')
+        for class_ in range(0,7):
+            create_dir(f'results/{model_}/{loss_}/images/os_{os_}')
+            create_dir(f'results/{model_}/{loss_}/images/os_{os_}/{class_}')
+
+        create_dir(f'results/{model_}/{loss_}/progress')
+        create_dir(f'results/{model_}/{loss_}/progress/os_{os_}')
         denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
@@ -221,47 +263,53 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
             if opts.save_val_results:
                 for j in range(len(images)):
-                    counter = i+j
-                    if counter % image_interval == 0:
-                        # Extract predictions, labels and image
-                        image = images[j].detach().cpu().numpy()
-                        target = targets[j]
-                        pred = preds[j]
+                    # Extract predictions, labels and image
+                    image = images[j].detach().cpu().numpy()
+                    target = targets[j]
+                    pred = preds[j]
 
-                        # Reformat real image 
-                        image = np.delete(image, 0, 0) # Delete NIR channel                        
-                        image = (image * 255).transpose(1, 2, 0).astype(np.uint8) # No need to denorm it, since it was never normalized
+                    if 0 in target:
+                        counter_0 += 1
+                        if counter_0 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 0, img_id, os_)
+                            img_id += 1
+                    
+                    if 1 in target:
+                        counter_1 += 1
+                        if counter_1 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 1, img_id, os_)
+                            img_id += 1
 
-                        # Reformat results from prediction
-                        R_pred,G_pred,B_pred = pixel_mapper(pred)
-                        # Create 3D image
-                        formatted_pred = np.array([R_pred,G_pred,B_pred])
-                        # Prepare for printing format
-                        pred = formatted_pred.transpose(1, 2, 0).astype(np.uint8)
-                        pred = np.clip(pred, 0, 255)  # Sanity check                   
-                        # Reformat results from target
-                        R_pred,G_pred,B_pred = pixel_mapper(target)
-                        # Create 3D image
-                        formatted_target = np.array([R_pred,G_pred,B_pred])
-                        target = formatted_target.transpose(1, 2, 0).astype(np.uint8)
-                        # Save results from validation
-                        Image.fromarray(image).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_image.png')
-                        Image.fromarray(target).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_target.png')
-                        Image.fromarray(pred).save(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_pred.png')
-                        # Overlap images
-                        fig = plt.figure()
-                        plt.imshow(image)
-                        #plt.title("Printing overlay of target and image")
-                        plt.axis('off')
-                        plt.imshow(pred, alpha=0.35)
-                        ax = plt.gca()
-                        ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                        plt.savefig(f'results_aug/{model_}/{loss_}/images/os_{os_}/{img_id}_overlay.png', bbox_inches='tight', pad_inches=0)
-                        #plt.show()
-                        plt.close()
-                        img_id += 1
-            
+                    if 2 in target:
+                        counter_2 += 1
+                        if counter_2 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 2, img_id, os_)
+                            img_id += 1  
+
+                    if 3 in target:
+                        counter_3 += 1
+                        if counter_3 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 3, img_id, os_)
+                            img_id += 1
+
+                    if 4 in target:
+                        counter_4 += 1
+                        if counter_4 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 4, img_id, os_)
+                            img_id += 1
+
+                    if 5 in target:
+                        counter_5 += 1
+                        if counter_5 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 5, img_id, os_)
+                            img_id += 1
+
+                    if 6 in target:
+                        counter_6 += 1
+                        if counter_6 % image_interval == 0:
+                            output_data(image, pred, target, model_, loss_, 6, img_id, os_)
+                            img_id += 1
+
         score = metrics.get_results()
     return score, ret_samples
 
@@ -325,9 +373,24 @@ def main():
         train_dst, val_dst = train_args.get_dataset()
     else:
         train_dst, val_dst = get_dataset(opts)
-    
-    train_loader = data.DataLoader(
-        train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
+
+    if opts.oversample:
+        # Generate sample weights
+        classes_ratio = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
+        sample_weights = np.zeros(len(train_dst))
+        index = 0
+        for img, mask in train_dst:
+            mask_array = mask.numpy()
+            sample_weights[index] = 0
+            for class_label in range(len(classes_ratio)):
+                sample_weights[index] += np.sum(mask_array == (class_label + 1))*classes_ratio[class_label]
+            index += 1
+        sample_weights = sample_weights / np.sum(sample_weights)
+        sampler = data.WeightedRandomSampler(sample_weights, len(sample_weights))
+        train_loader = data.DataLoader(train_dst, batch_size=opts.batch_size, sampler = sampler, num_workers=2)
+    else:
+        train_loader = data.DataLoader(train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
+        
     val_loader = data.DataLoader(
         val_dst, batch_size=opts.val_batch_size, shuffle=True, num_workers=2)
     print("Dataset: %s, Train set: %d, Val set: %d" %
@@ -503,7 +566,7 @@ def main():
                     overall_accuracies.append(val_score['Overall Acc'])
                     iterations_val.append(cur_itrs)
                     val_epochs.append(cur_epochs)
-                    np.save(f"./results_aug/{model_}/{loss_}/progress/os_{os_}/confusion_matrix.npy", val_score['Confusion matrix'])
+                    np.save(f"./results/{model_}/{loss_}/progress/os_{os_}/confusion_matrix.npy", val_score['Confusion matrix'])
 
                 if val_score['Mean IoU'] > best_score:  # save best model
                     best_score = val_score['Mean IoU']
@@ -547,8 +610,8 @@ def main():
                 output_df = pd.DataFrame.from_dict(output_dict)
                 train_df = pd.DataFrame.from_dict(train_dict)
 
-                output_df.to_csv(f"results_aug/{model_}/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
-                train_df.to_csv(f"results_aug/{model_}/{loss_}/progress/os_{os_}/train_results.csv", index = False)
+                output_df.to_csv(f"results/{model_}/{loss_}/progress/os_{os_}/eval_results.csv", index = False)
+                train_df.to_csv(f"results/{model_}/{loss_}/progress/os_{os_}/train_results.csv", index = False)
                 
                 return
 
