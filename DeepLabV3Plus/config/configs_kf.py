@@ -46,6 +46,8 @@ class agriculture_configs(object):
     save_pred = False
     save_rate = 0.1
     best_record = {}
+    extra_augment = False
+    classes_augment = None
 
     def __init__(self, net_name=model, data=dataset, bands_list=bands, kf=1, k_folder=5, note=''):
         self.model = net_name
@@ -77,7 +79,8 @@ class agriculture_configs(object):
         train_dict, val_dict, test_dict = self.get_file_list()
         # split_train_val_test_sets(name=self.dataset,KF=None, k=self.k,seeds=self.seeds)
         train_set = self.loader(mode='train', file_lists=train_dict, pre_norm=self.pre_norm,
-                                    num_samples=self.train_samples, windSize=self.input_size, scale=self.scale_rate)
+                                    num_samples=self.train_samples, windSize=self.input_size, scale=self.scale_rate,
+                               extra_augment = self.extra_augment, classes_augment = self.classes_augment)
         val_set = self.loader(mode='val', file_lists=val_dict, pre_norm=self.pre_norm,
                                   num_samples=self.val_samples, windSize=self.val_size, scale=self.scale_rate)
         return train_set, val_set
