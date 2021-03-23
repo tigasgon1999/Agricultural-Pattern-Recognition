@@ -19,3 +19,4 @@ DeepLabV3Plus/full_set_results/cross_entropy/images/os_16/*.png
 DeepLabV3Plus/full_set_results/cross_entropy/images/os_32/*.png
 
 DeepLabV3Plus/results_augmentations/**/*.png
+DeepLabV3Plus/results
