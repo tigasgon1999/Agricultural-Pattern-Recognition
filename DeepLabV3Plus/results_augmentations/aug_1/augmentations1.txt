@@ -1,4 +1,6 @@
 VerticalFlip(p=0.5),
 HorizontalFlip(p=0.5),
-RandomRotate90(p=0.5),
+RandomRotate90(p=0.5), # Rotation?
 ShiftScaleRotate(p=1, rotate_limit=45, scale_limit=0.1)
+
+# RandomSizedCrop
