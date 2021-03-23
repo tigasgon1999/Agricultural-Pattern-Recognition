@@ -381,7 +381,8 @@ def main():
         classes_ratio = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
         sample_weights = np.zeros(len(train_dst))
         index = 0
-        for img, mask in train_dst:
+        print("Starting oversamplng...")
+        for img, mask in tqdm(train_dst):
             mask_array = mask.numpy()
             sample_weights[index] = 0
             for class_label in range(len(classes_ratio)):
