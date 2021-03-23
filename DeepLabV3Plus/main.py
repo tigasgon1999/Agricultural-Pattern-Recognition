@@ -11,7 +11,7 @@ np.set_printoptions(threshold=sys.maxsize)
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
 from utils import ext_transforms as et
-from utils.loss import ACW_loss, ComposedLossWithLogits
+from utils.loss import ACW_loss
 import utils.lovasz_losses as L
 from metrics import StreamSegMetrics
 
@@ -539,7 +539,7 @@ def main():
             if vis is not None:
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
-            if (cur_itrs) % 1 == 0:
+            if (cur_itrs) % 10 == 0:
                 interval_loss = interval_loss/10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
