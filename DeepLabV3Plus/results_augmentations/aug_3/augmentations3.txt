@@ -1,0 +1,5 @@
+VerticalFlip(p=0.5),
+HorizontalFlip(p=0.5),
+RandomRotate90(p=0.5),
+RandomSizedCrop(min_max_height=(int(0.25*mask_height), int(0.75*mask_height)),
+height=mask_height, width=mask_width, p=1),
