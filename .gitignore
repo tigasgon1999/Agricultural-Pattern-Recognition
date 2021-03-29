@@ -10,15 +10,9 @@ env/
 Dataset/Agriculture-Vision.tar.gz?dl=0
 google-cloud-sdk-269.0.0-linux-x86_64.tar.gz
 Dataset/Reduced_dataset
-DeepLabV3Plus/downsample_loss_results/acw_loss/images/os_32/*.png
-DeepLabV3Plus/downsample_loss_results/cross_entropy/images/os_32/*.png
-DeepLabV3Plus/downsample_loss_results/focal_loss/images/os_32/*.png
-DeepLabV3Plus/downsample_loss_results/lovasz_loss/images/os_32/**/*.png
 
-DeepLabV3Plus/full_set_results/cross_entropy/images/os_8/*.png
-DeepLabV3Plus/full_set_results/cross_entropy/images/os_16/*.png
-DeepLabV3Plus/full_set_results/cross_entropy/images/os_32/*.png
-
+DeepLabV3Plus/downsample_loss_results/**/*.png
+DeepLabV3Plus/full_set_results/**/*.png
 DeepLabV3Plus/results_augmentations/**/*.png
 DeepLabV3Plus/oversample_results/**/*.png
 DeepLabV3Plus/augmentation_oversampling/**/*.png
