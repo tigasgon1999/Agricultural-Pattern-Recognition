@@ -270,47 +270,8 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
                     target = targets[j]
                     pred = preds[j]
 
-                    if 0 in target:
-                        counter_0 += 1
-                        if counter_0 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 0, img_id, os_)
-                            img_id += 1
-                    
-                    if 1 in target:
-                        counter_1 += 1
-                        if counter_1 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 1, img_id, os_)
-                            img_id += 1
-
-                    if 2 in target:
-                        counter_2 += 1
-                        if counter_2 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 2, img_id, os_)
-                            img_id += 1  
-
-                    if 3 in target:
-                        counter_3 += 1
-                        if counter_3 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 3, img_id, os_)
-                            img_id += 1
-
-                    if 4 in target:
-                        counter_4 += 1
-                        if counter_4 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 4, img_id, os_)
-                            img_id += 1
-
-                    if 5 in target:
-                        counter_5 += 1
-                        if counter_5 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 5, img_id, os_)
-                            img_id += 1
-
-                    if 6 in target:
-                        counter_6 += 1
-                        if counter_6 % image_interval == 0:
-                            output_data(image, pred, target, model_, loss_, 6, img_id, os_)
-                            img_id += 1
+                    output_data(image, pred, target, model_, loss_, 0, img_id, os_)
+                    img_id += 1
 
         score = metrics.get_results()
     return score, ret_samples
@@ -378,20 +339,15 @@ def main():
 
     if opts.oversample:
         # Generate sample weights
-        #Weights1:
-        #classes_weights = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
-        #Weights2:
-        #classes_weights = (1/6) / np.array([0.15, 0.03, 0.01, 0.07,  0.06, 0.68])
-        #Weights3:
-        classes_weights = np.array([4.6, 20.5, 69.1, 9.2, 12.1, 1.])
+        classes_ratio = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
         sample_weights = np.zeros(len(train_dst))
         index = 0
         print("Starting oversamplng...")
         for img, mask in tqdm(train_dst):
             mask_array = mask.numpy()
             sample_weights[index] = 0
-            for class_label in range(len(classes_weights)):
-                sample_weights[index] += np.sum(mask_array == (class_label + 1))*classes_weights[class_label]
+            for class_label in range(len(classes_ratio)):
+                sample_weights[index] += np.sum(mask_array == (class_label + 1))*classes_ratio[class_label]
             index += 1
         sample_weights = sample_weights / np.sum(sample_weights)
         sampler = data.WeightedRandomSampler(sample_weights, len(sample_weights))
