@@ -1,0 +1,1 @@
+classes_weights = np.array([4.6, 20.5, 69.1, 9.2, 12.1, 1.])

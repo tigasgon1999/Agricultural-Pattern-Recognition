@@ -20,14 +20,20 @@ class AlgricultureDataset(Dataset):
         self.winsize = windSize
         self.samples = num_samples
         self.scale = scale
-        self.all_ids = file_lists['all_files']
-        self.image_files = file_lists[IMG]  # image_files = [[bands1, bands2,..], ...]
-        self.mask_files = file_lists[GT]    # mask_files = [gt1, gt2, ...]
+        if mode == 'test':
+            self.image_files = file_lists[IMG] 
+        else:
+            self.all_ids = file_lists['all_files']
+            self.image_files = file_lists[IMG]  # image_files = [[bands1, bands2,..], ...]
+            self.mask_files = file_lists[GT]    # mask_files = [gt1, gt2, ...]
         self.extra_augment = extra_augment
         self.classes_augment = classes_augment
 
     def __len__(self):
-        return len(self.all_ids)
+        if self.mode == 'test':
+            3729
+        else:
+            return len(self.all_ids)
 
     def __getitem__(self, idx):
 
