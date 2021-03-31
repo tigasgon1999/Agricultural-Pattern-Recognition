@@ -333,7 +333,7 @@ def main():
         #classes_weights = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
         #Weights2:
         #classes_weights = (1/6) / np.array([0.15, 0.03, 0.01, 0.07,  0.06, 0.68])
-        #Weights1:
+        #Weights3:
         classes_weights = np.array([4.6, 20.5, 69.1, 9.2, 12.1, 1.])
         sample_weights = np.zeros(len(train_dst))
         index = 0
