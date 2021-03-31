@@ -329,14 +329,19 @@ def main():
 
     if opts.oversample:
         # Generate sample weights
-        classes_ratio = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
+        #Weights1:
+        #classes_weights = (1/6) / np.array([0.14, 0.07, 0.02, 0.06, 0.14, 0.70])
+        #Weights2:
+        #classes_weights = (1/6) / np.array([0.15, 0.03, 0.01, 0.07,  0.06, 0.68])
+        #Weights1:
+        classes_weights = np.array([4.6, 20.5, 69.1, 9.2, 12.1, 1.])
         sample_weights = np.zeros(len(train_dst))
         index = 0
         for img, mask in train_dst:
             mask_array = mask.numpy()
             sample_weights[index] = 0
-            for class_label in range(len(classes_ratio)):
-                sample_weights[index] += np.sum(mask_array == (class_label + 1))*classes_ratio[class_label]
+            for class_label in range(len(classes_weights)):
+                sample_weights[index] += np.sum(mask_array == (class_label + 1))*classes_weights[class_label]
             index += 1
         sample_weights = sample_weights / np.sum(sample_weights)
         sampler = data.WeightedRandomSampler(sample_weights, len(sample_weights))
