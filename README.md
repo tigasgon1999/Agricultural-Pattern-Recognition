@@ -10,7 +10,7 @@ training, 4,431 for validation, and 3,729 for testing. These 512 x 512 are image
 figure with sample images
 
 ## Problem
-Almost 70% of the images have an annotation of the most common class,Weed Cluster, whereas, there are 4 classes with an annotation on less than 5% of the images. The number of images by annotation class is shown in Figure 2. In addition to this, different classes have different sizes and shapes and appear at dierent frequencies. This is reflected on the total number of pixels for each class, with Weed cluster having significantly more pixels than all the other classes. This can be visualized below.
+Almost 70% of the images have an annotation of the most common class,Weed Cluster, whereas, there are 4 classes with an annotation on less than 5% of the images. The number of images by annotation class is shown in Figure 2. In addition to this, different classes have different sizes and shapes and appear at different frequencies. This is reflected on the total number of pixels for each class, with Weed cluster having significantly more pixels than all the other classes. This can be visualized below.
 
 figure with class imbalance
 
