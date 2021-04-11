@@ -1,5 +1,5 @@
 ## Tackling Class Imbalance on Agriculture-Vision Semantic Segmentation 
-We focus on improving DeepLabV3+’s performance on the Agriculture-Vision semantic segmentation task by addressing the class imbalance present in the data. This is done by experimenting with different loss functions and augmentation and oversampling schemes. We manage to achieve competitive results with an mIoU of 46.40% on the test set by adding an Adaptive Class Weighting mechanism on the loss function of the Baseline Model. The full report can be found (here)[here].
+We focus on improving DeepLabV3+’s performance on the Agriculture-Vision semantic segmentation task by addressing the class imbalance present in the data. This is done by experimenting with different loss functions and augmentation and oversampling schemes. We manage to achieve competitive results with an mIoU of 46.40% on the test set by adding an Adaptive Class Weighting mechanism on the loss function of the Baseline Model. The full report can be found (here)[https://github.com/tigasgon1999/mlp-cw3/blob/main/AgriculturalPatternRecognition-Report.pdf].
 
 ## Dataset and task
 We will perform a semantic segmentation task on the Agriculture-Vision data set (Chiu et al., 2020b), which consists of high-quality aerial farmland images with labelled
@@ -53,13 +53,14 @@ To tackle the class imbalance, we couple different loss functions to the archite
     ├── notebooks
     ├── plots
     └── utils
+ └── others
 ```
 	
 ## How to download the data
-The data should be downloaded by running ``wget https://www.dropbox.com/s/wpwhb517ck4o7vn/Agriculture-Vision.tar.gz?dl=0`` and unzipping it into the ``Dataset`` directory.
+The data should be downloaded by running ``wget https://www.dropbox.com/s/wpwhb517ck4o7vn/Agriculture-Vision.tar.gz?dl=0`` and unzipping it into the ``Dataset`` directory. Then, run ``pip install -r requirements.txt``, from the ``root`` directory.
 
 ## How the program can be run
-From the ``DeepLabV3Plus`` directory you can run ``bash PATH\_TO\_SCRIPT``. All the scripts are inside the ``experiments_scripts`` folder.
+From the ``DeepLabV3Plus`` directory you can run ``bash PATH_TO_SCRIPT``. All the scripts are inside the ``experiments_scripts`` folder.
 
 To create a reduced version of the dataset from the root directory run ``python Dataset/create_reduced_dataset.py``. Then in ``DeepLabV3Plus/data/Agriculture-Vision/pre_process.py`` comment line 13 (``DATASET_ROOT = '../Dataset/Agriculture-Vision'``) and uncomment line 15 (``#DATASET_ROOT = '../Dataset/Reduced_dataset'``).
 
