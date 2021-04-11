@@ -1,5 +1,5 @@
 ## Tackling Class Imbalance on Agriculture-Vision Semantic Segmentation 
-We focus on improving DeepLabV3+’s performance on the Agriculture-Vision semantic segmentation task by addressing the class imbalance present in the data. This is done by experimenting with different loss functions and augmentation and oversampling schemes. We manage to achieve competitive results with an mIoU of 46.40% on the test set by adding an Adaptive Class Weighting mechanism on the loss function of the Baseline Model.
+We focus on improving DeepLabV3+’s performance on the Agriculture-Vision semantic segmentation task by addressing the class imbalance present in the data. This is done by experimenting with different loss functions and augmentation and oversampling schemes. We manage to achieve competitive results with an mIoU of 46.40% on the test set by adding an Adaptive Class Weighting mechanism on the loss function of the Baseline Model. The full report can be found (here)[here].
 
 ## Dataset and task
 We will perform a semantic segmentation task on the Agriculture-Vision data set (Chiu et al., 2020b), which consists of high-quality aerial farmland images with labelled
@@ -7,17 +7,23 @@ agricultural patterns. More specifically, we will use the challenge data set1 us
 set. This subset contains 21,061 images of 512 x 512 pixels in four channels: RGB and Near Infra-red (NIR). We follow the split used in the competition and use 12,901 images for
 training, 4,431 for validation, and 3,729 for testing. These 512 x 512 are image patches from large farmland images that were cropped around annotated regions in the image. A sample from each class can be seen below.
 
-figure with sample images
+<p align="center">
+<img  src="others/Plots/labelled_images.png" width="800">
+</p>
 
 ## Problem
 Almost 70% of the images have an annotation of the most common class,Weed Cluster, whereas, there are 4 classes with an annotation on less than 5% of the images. The number of images by annotation class is shown in Figure 2. In addition to this, different classes have different sizes and shapes and appear at different frequencies. This is reflected on the total number of pixels for each class, with Weed cluster having significantly more pixels than all the other classes. This can be visualized below.
 
-figure with class imbalance
+<p align="center">
+<img  src="others/Plots/class_imbalance.png" width="400">
+</p>
 
 ## Methodology and Final Results
 To tackle the class imbalance, we couple different loss functions to the architecture, perform data augmentation and oversampling with the hopes of increasing the performance of DeepLabv3+ on the Agriculture-Vision dataset by improving its performance on the sparse and imbalanced classes. This study thus contributes with an extensive exploration into multiple ways in which class imbalance can be addressed on Agriculture aerial imagery. Our final model improves DeepLabv3+ performance by 5 percentage points, and qualitatively performs better, as shown below.
 
-figure with final qualitative results
+<p align="center">
+<img  src="others/Plots/final_image_comparison.png" width="1200">
+</p>
 
 ## How to run the code.
 ## File structure of the source code
