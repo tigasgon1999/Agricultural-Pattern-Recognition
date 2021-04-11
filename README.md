@@ -57,7 +57,7 @@ To tackle the class imbalance, we couple different loss functions to the archite
 ```
 	
 ## How to download the data
-The data should be downloaded by running ``wget https://www.dropbox.com/s/wpwhb517ck4o7vn/Agriculture-Vision.tar.gz?dl=0`` and unzipping it into the ``Dataset`` directory. Then, run ``pip install -r requirements.txt``, from the ``root`` directory.
+The data should be downloaded by running ``wget https://www.dropbox.com/s/wpwhb517ck4o7vn/Agriculture-Vision.tar.gz?dl=0`` and unzipping it into the ``Dataset`` directory. Then, run ``pip install -r requirements.txt``, from the ``root`` directory to install all necessary dependencies.
 
 ## How the program can be run
 From the ``DeepLabV3Plus`` directory you can run ``bash PATH_TO_SCRIPT``. All the scripts are inside the ``experiments_scripts`` folder.
